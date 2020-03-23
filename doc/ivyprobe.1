@@ -1,0 +1,122 @@
+.\" 
+.\" 
+.\" Ivy probe, an Ivy agent for monitoring exchanges on a bus
+.\" 
+.\" Copyright 1998-2000
+.\" Centre d'Etudes de la Navigation Aerienne
+.\" 
+.\" man page
+.\" 
+.\" Authors: Stephane Chatty <chatty@cena.dgac.fr>
+.\" 
+.\" $Id: ivyprobe.1 3259 2008-04-08 14:42:23Z bustico $
+.\" 
+.\" Please refer to file version.h for the
+.\" copyright notice regarding this software
+.\" 
+.TH "IVYPROBE" "1" "1/29/99" "Stephane Chatty" "utility"
+.SH "NAME"
+ivyprobe \- an Ivy agent for monitoring exchanges on a bus
+
+.SH "SYNOPSIS"
+.B ivyprobe [\-b bus] [regexps]
+
+.SH "DESCRIPTION"
+.B 
+ivyprobe
+connects to an Ivy bus and allows you to send and receive messages through a
+text interface. This is mainly useful for testing and debugging Ivy applications.
+
+
+.SH "OPTIONS"
+.TP 6
+.B \-b bus
+defines the Ivy bus to which to connect to. The syntax of bus addresses is
+.I [network[,network]][:port],
+where
+.I port
+is the UDP port used to broadcast the initial shakehand, and
+.I network[,network]
+is a set of network addresses on which information is
+broadcast. Examples of bus adresses are 192.75:2000, :2001 or 192.75,192.76.
+The default port is
+.I 2010,
+and the default network is
+.I 127,
+ie. loopback on the
+local host.
+
+.TP 
+.B regexps
+is a (possibly empty) list of regular expressions that define subscriptions.
+.B ivyprobe
+will subscribe to every of those regular expressions,
+and print the contents (or more exactly the captured contents) of all matching
+messages that will be emitted on the bus by other applications. Do not forget to 
+protect your regexps with quotes if you use brackets or the * sign, otherwise
+your shell will interpret them.
+
+.SH "EXAMPLES"
+.B ivyprobe '(.*)'
+will print all messages exchanged on the bus, with their full contents.
+
+.B ivyprobe 'Hello (.*)' 
+will give you the end of all messages starting with
+.I Hello.
+For instance, if an application emits
+.I Hello World,
+.B ivyprobe
+will print
+.I World.
+
+
+.SH "LINE COMMANDS"
+.B ivyprobe
+accepts instructions on its command line once launched:
+.TP 6
+.I EOF (Ctrl\-D)
+will make
+.B ivyprobe
+quit.
+.TP 
+.I All lines
+that do not start with a dot will be interpreted as messages to be
+broadcasted on the bus.
+.TP 
+.I \.help
+will print the list of possible commands.
+.TP 
+.I \.quit
+will make
+.B ivyprobe
+exit.
+.TP 
+.I \.bind 'regexp'
+will create a new subscription, that will add up to those
+passed at launch time.
+.TP 
+.I \.who
+will list all applcations present on the bus.
+.TP 
+.I \.die appname
+will ask application
+.I appname
+to quit, if present on the bus.
+.TP 
+.I \.direct appname id 'msg'
+will send a direct message to
+.I appname,
+if present on the bus.
+.TP 
+.I \.where appname
+will tell you on what host is
+.I appname,
+if present on the bus.
+
+
+.SH "BUGS"
+.B ivyprobe has no prompt for its command line.
+
+.SH "SEE ALSO"
+.PP 
+Ivy (1)

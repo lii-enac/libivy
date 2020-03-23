@@ -1,0 +1,268 @@
+.\" '\"
+.\" '\" Ivy, C interface \- library managing connexions to a software bus
+.\" '\"
+.\" '\" Copyright (C) 1997-2006
+.\" 
+.\" '\"
+.\" '\" See the file "license.terms" for information on usage and redistribution
+.\" '\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+.\" '\" 
+.\" '\" 
+.\" '\"	# Start an argument description
+.\" .de AP
+.\" .ie !"\\$4"" .TP \\$4
+.\" .el \{\
+.\" .   ie !"\\$2"" .TP \\n()Cu
+.\" .   el          .TP 15
+.\" .\}
+.\" .ie !"\\$3"" \{\
+.\" .ta \\n()Au \\n()Bu
+.\" \&\\$1	\\fI\\$2\\fP	(\\$3)
+.\" 
+.\" .\}
+.\" .el \{\
+.\" .br
+.\" .ie !"\\$2"" \{\
+.\" \&\\$1	\\fI\\$2\\fP
+.\" .\}
+.\" .el \{\
+.\" \&\\fI\\$1\\fP
+.\" .\}
+.\" .\}
+.\" ..
+.\" '\"	# define tabbing values for .AP
+.\" .de AS
+.\" .nr )A 10n
+.\" .if !"\\$1"" .nr )A \\w'\\$1'u+3n
+.\" .nr )B \\n()Au+15n
+.\" 
+.\" .if !"\\$2"" .nr )B \\w'\\$2'u+\\n()Au+3n
+.\" .nr )C \\n()Bu+\\w'(in/out)'u+2n
+.\" ..
+.\" '\"	# BS - start boxed text
+.\" '\"	# ^y = starting y location
+.\" '\"	# ^b = 1
+.TH "Ivy-c-3.11" "1" "3.11" "Francois-Regis Colin, Stephane Chatty" "library"
+.SH "NAME"
+IvyInit, IvyStart, IvyStop, IvyBindMsg, IvyChangeMsg, IvyUnbindMsg, IvyBindDirectMsg,
+IvySendMsg, IvySendDirectMsg, IvySendDieMsg, IvySendError, IvyGetApplicationName,
+IvyGetApplicationHost, IvyGetApplication, IvyGetApplicationList,
+IvyGetApplicationMessages, IvyDefaultApplicationCallback, IvySetFilter, IvySetBindCallback,
+IvyChannelInit, IvyChannelStop, IvyChannelAdd, IvyChannelRemove, IvyMainLoop,
+IvyChannelDelete, IvyChannelHandleRead, IvyChannelHandleExcpt,
+IvySetBeforeSelectHook, IvySetAfterSelectHook,
+IvyXtChannelAppContext, 
+.SH "SYNOPSIS"
+useful set of library functions for communicating between different
+processes through a software bus
+.nf 
+.sp
+void
+\fBIvyInit(\fIAppName, ready, callback, data, die_callback, die_data\fB)\fR
+.sp
+void
+\fBIvyStart(\fIbus\fB)\fR
+.sp
+void
+\fBIvyStop()\fR
+.sp
+MsgRcvPtr
+\fBIvyBindMsg(\fIcallback, user_data, regexp, ...\fB)\fR
+.sp
+void
+\fBIvyUnbindMsg(\fIid\fB)\fR
+.sp
+void
+\fBIvyBindDirectMsg(\fIcallback, user_data\fB)\fR
+.sp
+int
+\fBIvySendMsg(\fIfmt_message, ...\fB)\fR
+.sp
+void
+\fBIvySendDirectMsg(\fIapp, id, msg\fB)\fR
+.sp
+void
+\fBIvySendDieMsg(\fIapp\fB)\fR
+.sp
+void
+\fBIvySendError(\fIapp, id, fmt, ...\fB)\fR
+.sp
+char*
+\fBIvyGetApplicationName(\fIapp\fB)\fR
+.sp
+char*
+\fBIvyGetApplicationHost(\fIapp\fB)\fR
+.sp
+char*
+\fBIvyGetApplication(\fIname\fB)\fR
+.sp
+char*
+\fBIvyGetApplicationList()\fR
+.sp
+char**
+\fBIvyGetApplicationMessages(\fapp\fB)\fR
+.sp
+char*
+\fBIvyDefaultApplicationCallback(\fIapp, user_data, Event\fB)\fR
+char*
+\fBIvySetFilter(\fIargc, argv\fB)\fR
+.sp
+void
+\fBIvyChannelInit(\fIvoid\fB)\fR
+.sp
+Channel
+\fBIvyChannelAdd(\fIfd, data, handle_delete, handle_read\fB)\fR
+.sp
+void
+\fBIvyChannelRemove(\fIchannel\fB)\fR
+.sp
+void
+\fBIvyMainLoop()\fR
+.sp
+static void
+\fBIvyChannelHandleRead(\fIcurrent\fB)\fR
+.sp
+static void
+\fBIvyChannelHandleExcpt(\fIcurrent\fB)\fR
+.sp
+void
+\fBIvyXtChannelAppContext(\fIcntx\fB)\fR
+.SH "ARGUMENTS"
+Only main functions are detailed in this section
+.SH ""
+\fBIvyInit\fR:
+Initialisation of a connection
+.sp
+.AS "MaxSize" die_callback
+.AP const_char *AppName in
+Application Name
+.AP const_char *ready in
+Ready Message (can be NULL)
+.AP IvyApplicationCallback callback in
+Callback to be called on a connexion/deconnexion of an application
+.AP void *data in
+user data 
+.AP IvyDieCallback die_callback in
+last change callback before die
+.AP void *die_data in
+user data
+.SH "Example:"
+\fBIvyInit ("PLN\-SERVER", "PLN\-READY", NULL, NULL, NULL);\fR
+.SH ""
+\fBIvyStart\fR:
+Initialisation of TCP/UPD port and sending of a broadcast handshake on every network
+.AP const_char *bus in
+Bus to be used (format : network list followed by broadcast port).
+.SH "Example:"
+the given bus can be a string like 123.231,123.123:2000 or 123.231 or
+:2000. If no argument is specified, then the environment variable
+\fBIVYBUS\fR is checked, else the default value : 127.255.255.255:2010 
+is used (broadcast on the local machine).
+.nf 
+\fBIvyStart ("143.196.53.255:2001");\fR
+.SH ""
+\fBIvyBindMsg\fR:
+Message binding
+.AP MsgCallback callback in
+.AP void *user_data in
+.AP const_char *regexp in
+.AP MsgRcvPtr id out
+.SH "Example:"
+\fBIvyBindMsg (StartTimeCallback, 0,  "^CLOCK Start time=(.*)");\fR
+.nf 
+In this example the function \fBStartTimeCallback\fR will be called
+each time the string \fBCLOCK Start time=(.*)\fR will be emitted on
+the bus.
+There is a special syntax for specifying numeric interval, in this case
+the interval is locally transformed in a pcre regexp.
+syntax is \fB(?Imin#max[fi])\fR. min and max are the bounds,
+by default the regexp match decimal number, but if max bound is
+followed by 'i', the regexp match only integers ex : \fB(?I\-10#20), (?I20#25i)\fR
+Note that due to the regexp generator limitation (which will perhaps be raised eventually)
+the bounds are always integers.
+.SH ""
+\fBIvyUnbindMsg\fR:
+Message unbinding
+.AP MsgRcvPtr id in
+ident of the message to unbind
+.SH ""
+\fBIvySendMsg\fR:
+Sending a message
+.AP const_char* fmt in
+String to be sent on the bus
+.SH "Example:"
+\fBIvySendMsg ("SECTOR:%s.AIRCRAFT:%s Entered", sectorname, pln\->indicatif);\fR
+.SH ""
+\fBIvyChannelAdd\fR:
+.AP HANDLE fd in
+.AP void *data in
+.AP ChannelHandleDelete handle_delete in
+.AP ChannelHandleRead handle_read in
+.AP Channel out out
+.SH "Example:"
+\fBIvyChannelAdd (0, NULL, NULL, HandleStdin);\fR:
+.VE 
+.B E
+.SH "DESCRIPTION"
+.PP 
+These functions provide facilities for connecting applications on a
+software bus and managing messages exchanges among them.
+Each time an application initializes a connection on the bus, a
+"ready" message is sent to all other applications already connected, and the
+list of the messages subscribed by this application is dispatched.
+The format for the messages is free.
+
+.SH "EXAMPLE"
+Connection of the application \fBIVYPROBE\fR on a given bus
+.nf 
+
+.DS
+
+#include "ivyloop.h"
+#include "ivysocket.h"
+#include "ivy.h"
+
+ int main (int argc, char* argv[]){
+/* bus domain and port number to be used */
+	const char* bus="127.255.255.255:2010";
+/* initialisation of the connection */
+	IvyInit ("IVYPROBE",
+		 bport,
+		 "IVYPROBE READY",
+		 ApplicationCallback,
+		 NULL,
+		 NULL,
+		 NULL);
+/* keyboard's inputs management */
+	IvyChannelAdd(0, NULL, NULL, HandleStdin);
+/* starting the connection */
+	IvyStart (bus);
+/* Main loop */
+	IvyMainLoop();
+};
+.DE
+
+.SH "FILES"
+.I /usr/include/ivy.h
+.nf 
+.I /usr/include/ivyloop.h
+.nf 
+.I /usr/include/ivysocket.h
+.SH "ENVIRONMENT"
+.I IVYBUS
+.nf 
+.SH "DIAGNOSTICS"
+error messages displayed
+.SH "BUGS"
+none reported yet!
+.SH "AUTHORS"
+Francois\-Regis Colin
+Stephane Chatty
+.SH "SEE ALSO"
+ivyprobe (1)
+.sp
+For further details, please refer to the Ivy html page at http://www.tls.cena.fr/products/ivy/
+.SH "NOTES"
+In case of any comment or bug report on this library, please contact
+ivy@tls.cena.fr
+

@@ -1,0 +1,1 @@
+shlibs:Depends=libc6 (>= 2.3.2.ds1-21), libglib2.0-0 (>= 2.6.0), libice6, libpcre3 (>= 4.5), libsm6, libx11-6, libxt6

@@ -1,0 +1,12 @@
+prefix=@PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: ivy-glib
+Description: A software bus (Glib main loop)
+Requires: glib-2.0
+Version: @MAJOR@.@MINOR@
+Libs: -L${libdir} -lglibivy
+Libs.private: @PCRELIB@ @EXTRALIB@
+Cflags: -I${includedir}

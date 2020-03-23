@@ -1,0 +1,213 @@
+#
+#	Ivy, C interface
+#
+#	Copyright (C) 1997-2002
+#	Centre d'Études de la Navigation Aérienne
+#
+# 	Makefile
+#
+#	Authors: François-Régis Colin <fcolin@cena.fr>
+# 		Stéphane Chatty <chatty@cena.fr>
+#
+#	$Id: Makefile.mingw 3572 2013-03-20 10:34:52Z imbert $
+# 
+#	Please refer to file version.h for the
+#	copyright notice regarding this software
+#
+
+
+MAJOR=3
+MINOR=11
+#RM=del
+RM=rm -f
+XTINC = 
+XTLIB =  
+GTKINC = `gtk-config --cflags`
+GTKLIB = `gtk-config --libs`
+GLUTINC = -I/usr/include -I.
+GLUTLIB = -L.
+TCLINCL	= -I/usr/include/tcl8.4
+TCLLIB = -ltcl84
+PCREINC = $(shell pcre-config --cflags)
+PCRELIB = $(shell pcre-config --libs)
+#PCREINSTALLDIR = c:\temp\GnuWin32
+#PCREINC = -I$(PCREINSTALLDIR)\include
+#PCRELIB = -L$(PCREINSTALLDIR)\lib -lpcre
+CASESENSITIVE = "yes"
+ifeq ($(CASESENSITIVE), "no")
+	PCRE_OPT=PCRE_CASELESS
+	REGCOMP_OPT=REG_ICASE
+else
+	PCRE_OPT=0
+	REGCOMP_OPT=REG_EXTENDED	
+endif
+
+
+#REGEXP = -DGNU_REGEXP	-DREGCOMP_OPT=$(REGCOMP_OPT) # deprecated !
+REGEXP= -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
+
+TOOLS_DIR = ../tools
+CC=gcc
+CFLAGS =  -DWIN32 -DWINVER=0x0601 -D_WIN32_WINNT=0x0601  $(REGEXP) $(PCREINC)
+# IVY full debug
+#CFLAGS = -g  -DDEBUG -DWIN32 -DWINVER=0x0601 -D_WIN32_WINNT=0x0601  $(REGEXP) $(PCREINC)
+OBJ = ivyloop.o timer.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+GOBJ = ivyloop.o timer.o ivysocket.o givy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+XTOBJ = ivyxtloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+GLIBOBJ = ivyglibloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+GLUTOBJ = ivyglutloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+TCLOBJ = ivytcl.o  timer.o ivysocket.o givy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+
+# not yiet ivygtkprobe ivyxtprobe  need Modified Glut ivyglutprobe
+# Export all variables (Petr Mejzlik)
+export
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+
+all: static-libs  shared-libs tools
+
+static-libs: libivy.a libgivy.a
+#static-libs: libivy.a libgivy.a libtclivy.a  
+# not yiet libxtivy.a libgtkivy.a  need Modified Glut libglutivy.a
+
+shared-libs: libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR)
+#shared-libs: libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
+# not yiet libxtivy.so.$(MAJOR).$(MINOR) libgtkivy.so.$(MAJOR).$(MINOR) need Modified Glut libglutivy.so.$(MAJOR).$(MINOR)
+
+ivytcl.o: ivytcl.c
+	$(CC) -DGNU_REGEXP -c $(CFLAGS) $(TCLINCL) -o ivytcl.o ivytcl.c
+
+givy.o: ivy.c
+	$(CC) -DGNU_REGEXP -c $(CFLAGS) -o givy.o ivy.c
+
+ivyglutloop.o: ivyglutloop.c ivyglutloop.h
+	$(CC) -c $(CFLAGS) $(GLUTINC) -o ivyglutloop.o ivyglutloop.c
+
+ivygtkloop.o: ivygtkloop.c ivygtkloop.h
+	$(CC) -c $(CFLAGS) $(GTKINC) -o ivygtkloop.o ivygtkloop.c
+
+ivyprobe: ivyprobe.o libivy.a
+	$(CC)  $(CFLAGS) -o ivyprobe ivyprobe.o -L. -livy -lwsock32 $(PCRELIB) 
+
+ivyxtprobe.o : ivyprobe.c
+	$(CC)  $(CFLAGS) -c ivyprobe.c -o ivyxtprobe.o $(XTINC) -DXTMAINLOOP
+
+ivyxtprobe: ivyxtprobe.o libxtivy.a
+	$(CC) -o ivyxtprobe ivyxtprobe.o -L. $(XTLIB) -lxtivy -lXt -lX11 -lSM -lICE
+
+ivygtkprobe.o : ivyprobe.c
+	$(CC)  $(CFLAGS) -c ivyprobe.c -o ivygtkprobe.o $(XTINC) -DGTKMAINLOOP
+
+ivygtkprobe: ivygtkprobe.o libgtkivy.a
+	$(CC) -o ivygtkprobe ivygtkprobe.o -L. $(GTKLIB) -lgtkivy -lgtk -lgdk -lglib -lX11 -lSM -lICE -lm
+
+ivyglutprobe.o : ivyprobe.c
+	$(CC)  $(CFLAGS) -c ivyprobe.c -o ivyglutprobe.o $(GLUTINC) -DGLUTMAINLOOP
+
+ivyglutprobe: ivyglutprobe.o libglutivy.a
+	$(CC) -o ivyglutprobe ivyglutprobe.o -L. $(GLUTLIB) -lglutivy -lglut -lGLU -lGL -lX11 -lXmu
+
+libivy.a: $(OBJ)
+	$(RM) $@
+	ar q $@ $(OBJ)
+
+libgivy.a: $(GOBJ)
+	$(RM) $@
+	ar q $@ $(GOBJ)
+
+libxtivy.a: $(XTOBJ)
+	$(RM) $@
+	ar cq $@ $(XTOBJ)
+
+libgtkivy.a: $(GTKOBJ)
+	$(RM) $@
+	ar cq $@ $(GTKOBJ)
+
+libglutivy.a: $(GLUTOBJ)
+	$(RM) $@
+	ar cq $@ $(GLUTOBJ)
+
+libtclivy.a: $(TCLOBJ)
+	$(RM) $@
+	ar cq $@ $(TCLOBJ)
+
+libivy.so.$(MAJOR).$(MINOR): $(OBJ)
+	$(CC) -shared -Wl,-soname,libivy.so.$(MAJOR) -o $@ $(OBJ)  -lws2_32 $(PCRELIB) 
+
+libgivy.so.$(MAJOR).$(MINOR): $(GOBJ)
+	$(CC) -shared -Wl,-soname,libgivy.so.$(MAJOR) -o $@ $(GOBJ) -lws2_32 $(PCRELIB) 
+
+libxtivy.so.$(MAJOR).$(MINOR): $(XTOBJ)
+	$(CC) -shared -Wl,-soname,libxtivy.so.$(MAJOR) -o $@ \
+	$(XTOBJ) $(XTLIB) -lXt -lX11 
+
+libgtkivy.so.$(MAJOR).$(MINOR): $(GTKOBJ)
+	$(CC) -shared -Wl,-soname,libgtkivy.so.$(MAJOR) -o $@ \
+	$(GTKOBJ) $(GTKLIB) -lX11 
+
+libglutivy.so.$(MAJOR).$(MINOR): $(GTKOBJ)
+	$(CC) -shared -Wl,-soname,libglutivy.so.$(MAJOR) -o $@ \
+	$(GLUTOBJ) $(GLUTLIB) -lX11
+
+libtclivy.so.$(MAJOR).$(MINOR): $(TCLOBJ)
+	$(CC) -shared -Wl,-soname,libtclivy.so.$(MAJOR) -o $@ \
+	$(TCLOBJ) $(TCLLIB) -lws2_32 $(PCRELIB) 
+
+clean:
+	-$(RM)  *.o *.a *.so *.so.* *~
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw clean)
+
+installlibs: static-libs shared-libs
+	test -d $(PREFIX)/usr/lib || mkdir -p $(PREFIX)/usr/lib
+	test -d $(PREFIX)/usr/X11R6/lib || mkdir -p $(PREFIX)/usr/X11R6/lib
+	test -d $(PREFIX)/usr/include || mkdir -p $(PREFIX)/usr/include
+	install -m644 libivy.a $(PREFIX)/usr/lib
+	install -m644 libgivy.a $(PREFIX)/usr/lib
+	install -m644 libxtivy.a $(PREFIX)/usr/X11R6/lib
+	install -m644 libtclivy.a $(PREFIX)/usr/lib
+	install -m644 libgtkivy.a $(PREFIX)/usr/X11R6/lib
+
+	install -m644 libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+	install -m644 libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+	install -m644 libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
+	install -m644 libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+	install -m644 libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
+
+	install -m644 *.h $(PREFIX)/usr/include
+
+installliblinks: installlibs
+	ln -s /usr/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libtclivy.so
+	ln -s /usr/lib/libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libivy.so
+	ln -s /usr/lib/libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libivy.so.$(MAJOR)
+	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so
+	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so.$(MAJOR)
+	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so
+	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so.$(MAJOR)
+	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so
+	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so.$(MAJOR)
+	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so
+	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so.$(MAJOR)
+
+
+installbins: 
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw install)
+
+installdocs:
+	test -d $(PREFIX)/usr/doc/ivy-c || mkdir -p $(PREFIX)/usr/doc/ivy-c
+	for f in `find  ../doc/*.html -type f -maxdepth 1`; do \
+                install -m 644 $$f $(PREFIX)/usr/doc/ivy-c; \
+        done
+	test -d $(PREFIX)/usr/man/man1 || mkdir -p $(PREFIX)/usr/man/man1
+	for f in `find  ../doc/*.1 -type f -maxdepth 1`; do \
+                install -m 644 $$f $(PREFIX)/usr/man/man1; \
+        done
+
+install: installlibs installbins installliblinks installdocs
+
+tools: static-libs
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw)
+
+rpm::
+	/usr/bin/rpmize
+

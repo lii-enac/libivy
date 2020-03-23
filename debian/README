@@ -1,0 +1,5 @@
+
+Construction de ivy-c :
+
+  - Il faut installer au préalable le paquetage utils-c-dev qui
+  fourni list.h.

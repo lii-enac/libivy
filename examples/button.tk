@@ -1,0 +1,21 @@
+#!/usr/bin/wish
+load ../src/libtclivy.so.3.11
+
+proc connect { client action } { }
+proc send { } {
+  global tosend
+  Ivy::send $tosend
+}
+
+proc dotext {client text} {
+  global tosend
+  set tosend $text
+  puts "text to send set to $text"
+}
+
+Ivy::init "TCLTK" "TCLTK Ready" connect connect
+Ivy::start 127.255.255.255:2010
+Ivy::bind "^Ivy Button text=(.*)" dotext
+set tosend foo
+button .send -command send -text "send msg"
+pack .send

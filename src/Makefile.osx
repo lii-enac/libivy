@@ -1,0 +1,182 @@
+#
+#       Ivy, C interface
+#
+#       Copyright (C) 1997-2014
+#       Centre d'Études de la Navigation Aérienne
+#
+#       Makefile.osx
+#
+#       Authors: François-Régis Colin <fcolin@cena.fr>
+#                Stéphane Chatty <chatty@cena.fr>
+#                Yannick Jestin <jestin@cena.fr>
+#                Piotr Esden-Tempski <piotr@esden.net>
+#
+#       Please refer to file version.h for the
+#       copyright notice regarding this software
+#
+
+# change this in version.h too !!!!
+MAJOR=3
+MINOR=15
+
+LIB=/lib
+
+# by default use fPIC on all systems
+FPIC ?= -fPIC
+
+ifndef PREFIX
+	PREFIX=/opt/local
+endif
+
+PCREINC = $(shell pcre-config --cflags)
+PCRELIB = $(shell pcre-config --libs)
+CASESENSITIVE = "yes"
+ifeq ($(CASESENSITIVE), "no")
+	PCRE_OPT=PCRE_CASELESS
+	REGCOMP_OPT=REG_ICASE
+else
+	PCRE_OPT=0
+	REGCOMP_OPT=REG_EXTENDED
+endif
+REGEXP= -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
+
+OBJ = ivyloop.o timer.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+OMPOBJ = ivyloop.o timer.o ivysocket_omp.o ivy_omp.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+GLIBOBJ = ivyglibloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
+
+TOOLS_DIR = ../tools
+
+# you should first install gcc version >= 4.3
+# gcc (g++) 4.3 is the first gcc version which support openmp under macosx
+# using macport greatly simplify gcc install : port install gcc44
+OMPCC = gcc-mp-4.4
+OMPCPP =  g++-mp-4.4
+OMPLIBTOOL =ar q
+OMPCFLAGS = -g -Wall $(FPIC) -fopenmp -DOPENMP=1
+OMPLIB = -lgomp -lpthread
+
+GLIBINC = `pkg-config --cflags glib-2.0`
+GLIBLIB = `pkg-config --libs glib-2.0`
+
+
+LIBTOOL=ar q # linux and solaris
+CFLAGS = -g -Wall $(FPIC)
+
+CC=gcc
+CPP=g++
+#CC = $(OMPCC)
+#CPP = $(OMPCPP)
+LIBTOOL = $(OMPLIBTOOL)
+CFLAGS = -g -Wall -Wshadow $(FPIC)
+
+# ------------------------------------------------------------------------------------------
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
+
+.cpp.o:
+	$(CPP) $(CFLAGS)  -c $*.cpp
+
+
+all: static-libs shared-libs pkgconf
+libomp: libivy_omp.a
+
+omp: libomp
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.osx omp)
+
+static-libs: libivy.a libglibivy.a
+
+shared-libs: libivy.dylib libglibivy.dylib
+
+ivybind.o: ivybind.c
+	$(CC) -c $(CFLAGS) $(REGEXP) $(PCREINC) ivybind.c
+
+ivy_omp.o: ivy.c
+	$(OMPCC) -c $(OMPCFLAGS)  -o ivy_omp.o ivy.c
+
+ivysocket_omp.o: ivysocket.c
+	$(OMPCC) -c $(OMPCFLAGS)  -o ivysocket_omp.o ivysocket.c
+
+ivyglibloop.o: ivyglibloop.c ivyglibloop.h
+	$(CC) -c $(CFLAGS) $(GLIBINC) ivyglibloop.c
+
+libivy.a: $(OBJ)
+	rm -f $@
+	$(LIBTOOL) $@ $(OBJ)
+
+libivy_omp.a: $(OMPOBJ)
+	rm -f $@
+	$(LIBTOOL) $@ $(OMPOBJ)
+
+libivy.dylib: $(OBJ)
+	$(CC) $(CFLAGS) -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libivy.dylib -o $@ $(OBJ) $(PCRELIB)
+	#$(CC) $(CFLAGS) -dynamiclib  -o $@ $(OBJ) $(PCRELIB)
+
+libivy_omp.dylib: $(OMPOBJ)
+	$(OMPCC) -dynamiclib -install_name $(DESTDIR)$(PREFIX)$(LIB)/lib/libivy_omp.dylib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
+	#$(OMPCC) -dynamiclib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
+
+libglibivy.a: $(GLIBOBJ)
+	rm -f $@
+	$(LIBTOOL) $@ $(GLIBOBJ)
+
+libglibivy.dylib: $(GLIBOBJ)
+	$(CC) $(CFLAGS)  -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libglibivy.dylib  -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
+	#$(CC) $(CFLAGS)  -dynamiclib -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
+
+
+
+# ------------------------------------------------------------------------------------------
+
+installlibs: static-libs shared-libs
+	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
+	install_name_tool -id $(PREFIX)/lib/libivy.dylib libivy.dylib
+	install_name_tool -id $(PREFIX)/lib/libglibivy.dylib libglibivy.dylib
+	install -m644 libivy.a		$(DESTDIR)$(PREFIX)/lib/
+	install -m644 libivy.dylib	$(DESTDIR)$(PREFIX)/lib/
+	install -m644 libglibivy.a	$(DESTDIR)$(PREFIX)/lib/
+	install -m644 libglibivy.dylib	$(DESTDIR)$(PREFIX)/lib/
+
+includes:
+	test -d $(DESTDIR)$(PREFIX)/include/Ivy || mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
+	install -m644 ivy.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivybind.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivybuffer.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivychannel.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivydebug.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivyloop.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivysocket.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 list.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 timer.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 version.h		$(DESTDIR)$(PREFIX)/include/Ivy/
+	install -m644 ivyglibloop.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+
+installbins: tools
+	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install -m755 $(TOOLS_DIR)/ivyprobe $(DESTDIR)$(PREFIX)/bin
+	install -m755 $(TOOLS_DIR)/ivyperf $(DESTDIR)$(PREFIX)/bin
+	install_name_tool -change libivy.dylib $(DESTDIR)$(PREFIX)/lib/libivy.dylib $(DESTDIR)$(PREFIX)/bin/ivyprobe
+	install_name_tool -change libivy.dylib $(DESTDIR)$(PREFIX)/lib/libivy.dylib $(DESTDIR)$(PREFIX)/bin/ivyperf
+
+
+tools: static-libs
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.osx)
+
+install: installlibs installbins includes installpkgconf
+
+# ------------------------------------------------------------------------------------------
+
+clean:
+	-rm -f  *.o *.a *.dylib *.dylib.* *~ *.pc
+	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.osx clean)
+
+# ------------------------------------------------------------------------------------------
+
+pkgconf:
+	for f in *.pc.in ; do \
+		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > $$(echo $$f | cut -f 1,2 -d .); \
+	done
+
+installpkgconf: pkgconf
+	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
+	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig

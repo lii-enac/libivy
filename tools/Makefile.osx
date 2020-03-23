@@ -1,0 +1,64 @@
+TARGETS = ivyprobe ivythroughput ivyperf #ivyprobe_efence 
+OMP_TARGET= ivyprobe_omp ivythroughput_omp 
+OMPLIB = -lgomp -lpthread
+OMPCC = gcc-mp-4.4  
+OMPCPP =  g++-mp-4.4
+CC = gcc -g -Wall
+CPP='g++'
+#CC = $(OMPCC)
+#CPP= $(OMPCPP)
+
+PCRELIB = `pcre-config --libs`
+PCREINCL = `pcre-config --cflags`
+EXTRALIB= -L../src 
+EXTRAINC=-I../src
+
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) $(CFLAGS) $(EXTRAINC) -c $*.c
+.cpp.o:
+	$(CPP) $(CFLAGS) $(EXTRAINC) $(PCREINCL) -c $*.cpp
+
+
+all: $(TARGETS)
+omp: $(OMP_TARGET)
+
+ivyprobe: ivyprobe.o ../src/libivy.a
+	$(CC)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyprobe.o -L../src -livy $(PCRELIB) $(EXTRALIB) 
+
+ivythroughput: ivythroughput.o ../src/libivy.a
+	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivythroughput.o -L../src -livy -lpcrecpp $(PCRELIB) $(EXTRALIB) 
+
+ivyprobe_efence: ivyprobe.o ../src/libivy.a
+	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyprobe.o -L../src -livy -lpcrecpp $(PCRELIB) $(EXTRALIB) -lefence
+
+
+
+ivyprobe_omp: ivyprobe.o ../src/libivy_omp.a
+	$(OMPCC)  $(CFLAGS) $(FPIC) $(EXTRAINC) $(PCREINCL) -o $@ ivyprobe.o -L../src -livy_omp $(PCRELIB) $(EXTRALIB) $(OMPLIB) -lgcc_s.1
+
+ivythroughput_omp: ivythroughput.o ../src/libivy_omp.a
+	$(OMPCPP)  $(CFLAGS) $(FPIC)$(EXTRAINC) $(PCREINCL) -o $@ ivythroughput.o -L../src -livy_omp -lpcrecpp $(PCRELIB) $(EXTRALIB) $(OMPLIB) -lgcc_s.1
+
+ivyprobe.o : ivyprobe.c 
+	$(CC)  $(CFLAGS) $(FPIC) $(EXTRAINC) $(REGEXP) -c ivyprobe.c -o $@
+
+ivyperf: ivyperf.o ../src/libivy.a
+	$(CC)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyperf.o -L../src -livy $(PCRELIB) $(EXTRALIB)
+
+
+installbins: $(TARGETS)
+	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install -m755 ivyprobe $(DESTDIR)$(PREFIX)/bin
+
+installbins_omp:  $(OMP_TARGET)
+	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install -m755 ivyprobe_omp $(DESTDIR)$(PREFIX)/bin
+
+install: installbins 
+install_omp: installbins_omp
+
+
+clean:
+	rm -fR $(TARGETS) *~ *.o

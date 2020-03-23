@@ -1,0 +1,45 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ivy", "ivy_c.vcxproj", "{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcre", "..\..\pcre\pcre.vcxproj", "{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 3
+		SccLocalPath0 = .
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ivy_c.vcxproj
+		SccLocalPath1 = .
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = ..\\..\\pcre\\pcre.vcxproj
+		SccProjectName2 = \u0022$/pcre\u0022,\u0020KSHAAAAA
+		SccLocalPath2 = ..\\..\\pcre
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Debug|Win32.Build.0 = Debug|Win32
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Debug|x64.ActiveCfg = Debug|Win32
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Release|Win32.ActiveCfg = Release|Win32
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Release|Win32.Build.0 = Release|Win32
+		{4BD59668-D7DA-4AFC-9F27-E3CEE16940D3}.Release|x64.ActiveCfg = Release|Win32
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Debug|Win32.Build.0 = Debug|Win32
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Debug|x64.ActiveCfg = Debug|x64
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Debug|x64.Build.0 = Debug|x64
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Release|Win32.ActiveCfg = Release|Win32
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Release|Win32.Build.0 = Release|Win32
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Release|x64.ActiveCfg = Release|x64
+		{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

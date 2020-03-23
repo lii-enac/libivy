@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: ivy-c
+Description: A software bus
+Version: @MAJOR@.@MINOR@
+Libs: -L${libdir} -livy
+Libs.private: @PCRELIB@ @EXTRALIB@
+Cflags: -I${includedir}

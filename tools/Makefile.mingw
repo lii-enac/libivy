@@ -1,0 +1,60 @@
+#
+#	Ivy, C interface
+#
+#	Copyright (C) 1997-2002
+#	Centre d'Études de la Navigation Aérienne
+#
+# 	Makefile
+#
+#	Authors: François-Régis Colin <fcolin@cena.fr>
+# 		Stéphane Chatty <chatty@cena.fr>
+#
+#	$Id: Makefile.mingw 3061 2007-02-13 08:35:08Z fourdan $
+# 
+#	Please refer to file version.h for the
+#	copyright notice regarding this software
+#
+
+
+#RM=del
+RM=rm -f
+XTINC = 
+XTLIB =  
+GTKINC = `gtk-config --cflags`
+GTKLIB = `gtk-config --libs`
+GLUTINC = -I/usr/include -I.
+GLUTLIB = -L.
+TCLINCL	= -I/usr/include/tcl8.4
+TCLLIB = -ltcl84
+
+EXTRALIB= -L../src -lws2_32 
+EXTRAINC=-I../src
+
+
+CC=gcc
+#CFLAGS = -g 
+# IVY full debug
+CFLAGS = -g  -DDEBUG
+TARGETS = ivyprobe 
+# not yiet ivygtkprobe ivyxtprobe  need Modified Glut ivyglutprobe
+
+.c.o:
+	$(CC) $(CFLAGS)  $(PCREINC) $(EXTRAINC) -c $*.c
+
+all: $(TARGETS)
+
+ivyprobe: ivyprobe.o ../src/libivy.a
+	$(CC)  $(CFLAGS) $(EXTRAINC) -o $@ ivyprobe.o -L. -livy $(PCRELIB) $(EXTRALIB) 
+
+clean:
+	-$(RM) $(TARGETS) *.o *.a *.so *.so.* *~
+
+install: installbins 
+
+installbins: commands
+	test -d $(PREFIX)/usr/bin || mkdir -p $(PREFIX)/usr/bin
+	test -d $(PREFIX)/usr/X11R6/bin || mkdir -p $(PREFIX)/usr/X11R6/bin
+	install -m755 ivyprobe $(PREFIX)/usr/bin
+#	install -m755 ivyglutprobe $(PREFIX)/usr/X11R6/bin
+
+

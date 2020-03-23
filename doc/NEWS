@@ -1,0 +1,84 @@
+﻿What's new in 3.11 release ?
+
+1. Overview
+Firstly, all changes are internal, no api change. Changes are only some fixes, several speed optimizations for agent sending lot of messages, socket mode set to 'non blocking', and a perfmeter tool.
+2.Non blocking mode for sending messages
+Ivy library used to send messages with socket in standard blocking mode. There is numerous problems doing this :
+1.all agents on a bus are blocked by the slowest one, so just one slow agent can block all others.
+2.When establishing connexion, if two agents have to exchange lot of regexps, a deadlock will occurs in non blocking mode.
+3.In non blocking mode, if an agent is not consuming messages as fast as you sent it to him, local ivy library behavior consists in buffering the messages in a fifo until the fifo is considered to big, after that, new messages will be lost and be sent until slow client consumes all his buffered messages.
+
+3. Speed optimizations
+There is two kind of optimization in 3.11 version :
+1.using smarter data structure : “hashtable of lists” instead of “lists of lists”
+2.using multiprocess/multicore power, parallelizing the most cpu intensive task of  ivy library : regexps filtering is now done concurrent, thanks to openmp api. Since openmp is not  available on all compilers, the generation of omp version of the lib is optional, and is done with make omp at src level. This will generate omp version of static and dynamic lib, omp version of ivyprobe and ivythroughput. Ompenmp generation as been successfully tested only on linux intel with gcc 4.2 and up, and with intel icc. 
+3.On a quad proc box, speedup is between 3 and 10 using ivyomp3.11 vs ivy3.9
+
+4. behavior changes between 3.9 en 3.11
+
+Openmp version of the lib should have exactly same behavior than classic one, but switching the behavior of socket sending to non blocking and local buffering brings new type of events that could be sent to main application : the C type IvyApplicationEvent which was already existing  with “IvyApplicationConnected, IvyApplicationDisconnected”, hash been augmented with
+“IvyApplicationCongestion, IvyApplicationDecongestion, IvyApplicationFifoFull”
+there meanings are :
+IvyApplicationCongestion : distant agent is two slow, and message are locally buffered
+IvyApplicationDecongestion :  distant agent behavior become normal again
+IvyApplicationFifoFull :  distant agent is still two slow, and fifo has reach maximum size, subsequent messages sent to this agent will be lost.
+
+ 
+example :
+main (int argc, char **argv)
+{
+.
+  IvyInit ("IvyThroughputEmit", "IvyThroughputEmit Ready", congestCB, NULL,NULL,NULL);
+.
+}
+
+.
+.
+
+void congestCB ( IvyClientPtr app, void *user_data, IvyApplicationEvent event ) 
+{
+  string appName = IvyGetApplicationName( app );
+
+  switch ( event ) {
+  case IvyApplicationCongestion:
+    printf("Application:%s : Congestion\n", appName.c_str());
+    break;
+  case IvyApplicationDecongestion:
+    printf("Application:%s : DEcongestion\n", appName.c_str());
+    break;
+  case IvyApplicationFifoFull:
+    printf("Application:%s : FIFO PLEINE, MESSAGES PERDUS !!!\n", appName.c_str());
+    break;
+  case IvyApplicationConnected:
+    //    printf("Application:%s : Connected\n", appName.c_str());
+  case IvyApplicationDisconnected:
+    // printf("Application:%s : Disconnected\n", appName.c_str());
+    break;
+  }
+}
+
+5.a new tool for measuring performance : ivythroughput
+ ./ivythroughput_omp -v -t tp -R 500 -M 5000 -n4 -d 60  
+
+this will initiate a bench : 10 clients are created, they will bind 500 regexps of the file testivy/regexp.txt, then the emitter process will periodically send 5000 messages of the file 
+ testivy/messages.ivy, and  this will be displayed :
+[ivy 3.11] envoyer [34124/5000] messages filtres par 500 regexps a 4 clients prends 0.4 seconde
+
+possibles options are :
+usage: ivythroughput_omp [options]
+         -b bus defines the Ivy bus to which to connect to, defaults to 127:2010
+         -v      prints the ivy release number
+         -t      type of test :  ml or ml2 (memory leak) or tp (throughput)
+         -r      regexfile      read list of regexp's from file
+         -p      each client will prepends regexp with uniq string to simulate N clients with different regexps
+         -m      messageFile    read list of messages from file
+        -R      restrict to R firsts regexps instead of all the regexp in the regexp file
+        -M      restrict to M firsts messages instead of all the message in the message file
+         -n      number of clients
+         -d      duration of the test in seconds
+
+6. credits
+ivy-c now use an opensource bsd license hash library : utash, thanks to
+Troy D. Hanson for this concise en efficient library.
+http://uthash.sourceforge.net/
+
