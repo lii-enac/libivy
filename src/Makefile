@@ -52,6 +52,9 @@ ifndef TCLVERS
 TCLVERS:= $(shell perl -e '@_=sort map (m|/usr/lib64/libtcl(\d\.\d)\.so|, glob ("/usr/lib64/libtcl*")); print pop @_')
 endif
 ifndef TCLVERS
+TCLVERS:= $(shell perl -e '@_=sort map (m|/usr/lib/tcl(\d\.\d)|, glob ("/usr/lib/tcl*")); print pop @_')
+endif
+ifndef TCLVERS
 #TCLVERS=8.4
 TCLVERS=
 endif
@@ -97,7 +100,7 @@ REGEXP= -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 CHANNEL = -DTCL_CHANNEL_INTEGRATION
 
 # DEBUG
-CFLAGS_DEBUG = -g -Wall -Wshadow -DDEBUG $(FPIC)
+CFLAGS_DEBUG = -g -Wall -Wshadow $(FPIC)
 # RELEASE
 CFLAGS_RELEASE = -O2 -Wall -Wshadow $(FPIC)
 
@@ -159,7 +162,7 @@ ivytcl.o: ivytcl.c
 	$(CC) -c $(CFLAGS) $(TCLINCL) $(CHANNEL) ivytcl.c
 
 givy.o: ivy.c
-	$(CC) -c $(CFLAGS) -DDEBUG -o givy.o ivy.c
+	$(CC) -c $(CFLAGS) -o givy.o ivy.c
 
 ivy_omp.o: ivy.c
 	$(CC) -c $(OMPCFLAGS)  -o ivy_omp.o ivy.c
@@ -249,16 +252,14 @@ installlibs: static-libs shared-libs
 	-test -d $(DESTDIR)$(X11_PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(X11_PREFIX)$(LIB)
 
 	install -m644 libivy.a						$(DESTDIR)$(PREFIX)$(LIB)
-	install -m644 libgivy.a						$(DESTDIR)$(PREFIX)$(LIB)
-	-install -m644 libxtivy.a					$(DESTDIR)$(X11_PREFIX)$(LIB)
-	install -m644 libtclivy.a					$(DESTDIR)$(PREFIX)$(LIB)
-	install -m644 libglibivy.a					$(DESTDIR)$(PREFIX)$(LIB)
+#	install -m644 libgivy.a						$(DESTDIR)$(PREFIX)$(LIB)
+#	-install -m644 libxtivy.a					$(DESTDIR)$(X11_PREFIX)$(LIB)
+#	install -m644 libtclivy.a					$(DESTDIR)$(PREFIX)$(LIB)
 
 	install -m644 libivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
-	install -m644 libgivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
-	-install -m644 libxtivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(X11_PREFIX)$(LIB)
-	install -m644 libtclivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
-	install -m644 libglibivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
+#	install -m644 libgivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
+#	-install -m644 libxtivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(X11_PREFIX)$(LIB)
+#	install -m644 libtclivy.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
 
 installlibs_omp: static-libs shared-libs
 	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
