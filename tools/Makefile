@@ -1,4 +1,4 @@
-TARGETS = ivyprobe ivythroughput ivytestready ivyperf ivyglibprobe ivyxtprobe #ivyprobe_efence 
+TARGETS = ivyprobe #ivythroughput ivytestready ivyperf ivyglibprobe ivyxtprobe #ivyprobe_efence 
 OMP_TARGET= ivyprobe_omp ivythroughput_omp 
 
 PCRELIB = `pcre-config --libs`

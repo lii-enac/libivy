@@ -18,6 +18,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
+MINOR2=1
 
 PERHAPS64 := $(shell getconf LONG_BIT | perl -ne "print /64/ ? '64' : '';")
 LIB = /lib$(PERHAPS64)
@@ -126,8 +127,8 @@ GLUTOBJ = ivyglutloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o interv
 TCLOBJ = ivytcl.o  timer.o ivysocket.o givy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
 # WINDOWS add ivyloop.o if TCL_CHANNEL_INTEGRATION is not set
 
-TARGETLIBS=libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR) libxtivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
-STATICTARGETLIBS=libivy.a libgivy.a libxtivy.a libtclivy.a
+TARGETLIBS=libivy.so.$(MAJOR).$(MINOR) #libgivy.so.$(MAJOR).$(MINOR) libxtivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
+STATICTARGETLIBS=libivy.a #libgivy.a libxtivy.a libtclivy.a
 
 ifeq ($(HAVE_GLIB),yes)
 		TARGETLIBS += libglibivy.so.$(MAJOR).$(MINOR)
@@ -242,14 +243,16 @@ libtclivy.so.$(MAJOR).$(MINOR): $(TCLOBJ)
 #	libtool -dynamic -o $@ $(TCLOBJ) $(TCLLIB) $(PCREOBJ) $(PCRELIB) -lc
 
 distclean: clean
+clear: clean 
 clean:
 	-rm -f $(TARGETS) $(TARGETLIBS)  *.o *.a *.so *.so.* *~ *.pc
+	rm -rf build/
 	@(cd $(TOOLS_DIR) && $(MAKE) clean)
 
 
 installlibs: static-libs shared-libs
 	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
-	-test -d $(DESTDIR)$(X11_PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(X11_PREFIX)$(LIB)
+#-test -d $(DESTDIR)$(X11_PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(X11_PREFIX)$(LIB)
 
 	install -m644 libivy.a						$(DESTDIR)$(PREFIX)$(LIB)
 #	install -m644 libgivy.a						$(DESTDIR)$(PREFIX)$(LIB)
@@ -288,13 +291,13 @@ includes:
 installliblinks: installlibs
 	ln -fs $(PREFIX)$(LIB)/libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so
 	ln -fs $(PREFIX)$(LIB)/libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so.$(MAJOR)
-	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so
-	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so.$(MAJOR)
-	-ln -fs $(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR).$(MINOR)	$(DESTDIR)$(X11_PREFIX)$(LIB)/libxtivy.so
-	-ln -fs $(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR).$(MINOR)	$(DESTDIR)$(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR)
-	ln -fs $(PREFIX)$(LIB)/libtclivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libtclivy.so
-	ln -fs $(PREFIX)$(LIB)/libtclivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libtclivy.so.$(MAJOR)
-	ln -fs $(PREFIX)$(LIB)/libivy_omp.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy_omp.so
+# 	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so
+# 	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so.$(MAJOR)
+# 	-ln -fs $(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR).$(MINOR)	$(DESTDIR)$(X11_PREFIX)$(LIB)/libxtivy.so
+# 	-ln -fs $(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR).$(MINOR)	$(DESTDIR)$(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR)
+# 	ln -fs $(PREFIX)$(LIB)/libtclivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libtclivy.so
+# 	ln -fs $(PREFIX)$(LIB)/libtclivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libtclivy.so.$(MAJOR)
+# 	ln -fs $(PREFIX)$(LIB)/libivy_omp.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy_omp.so
 
 installbins:
 	@(cd $(TOOLS_DIR) && $(MAKE) install)
@@ -331,10 +334,43 @@ rpm::
 	/usr/bin/rpmize
 
 pkgconf:
-	for f in *.pc.in ; do \
-		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > $$(echo $$f | cut -f 1,2 -d .); \
+	for f in ivy-c.pc.in ; do \
+		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf
 	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig
+
+
+#----------------------------------------
+# package builder
+
+#deb
+
+#note: 
+# use dpkg-depcheck -d make to find out all dependency on libivy
+# last tryon ubuntu 18_04: 
+#      	pkg-config
+# install with:
+#		sudo dpkg -i libivy_x.x.deb
+# remove with:
+#		sudo dpkg -r libivy
+deb_destdir_version = build/deb/libivy_$(MAJOR).$(MINOR).$(MINOR2)
+deb_prefix = /usr
+deb_destdir= $(shell pwd)/$(deb_destdir_version)
+deb:	
+	make installlibs installbins installliblinks includes installpkgconf DESTDIR=$(deb_destdir) PREFIX=$(deb_prefix)
+	test -d $(deb_destdir)$(deb_prefix_version)/DEBIAN || mkdir -p $(deb_destdir)$(deb_prefix_version)/DEBIAN
+	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' deb/control > $(deb_destdir)$(deb_prefix_version)/DEBIAN/control
+# cp triggers file
+	cp deb/triggers $(deb_destdir)$(deb_prefix_version)/DEBIAN/triggers
+# remove debug symbol from library
+	cd $(deb_destdir)$(deb_prefix)$(LIB) ; strip --strip-debug --strip-unneeded *.so.$(MAJOR).$(MINOR)
+# remove rpath from library
+#	cd $(deb_prefix)/lib ; chrpath -d *.so
+# build package with fakeroot
+	cd "build/deb" ; fakeroot dpkg-deb --build libivy_$(MAJOR).$(MINOR).$(MINOR2)
+# check integrity of the build package. We still have error
+#	cd "build/deb" ; lintian djnn-cpp_$(MAJOR).$(MINOR).$(MINOR2).deb
+.PHONY: deb

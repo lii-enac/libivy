@@ -1,0 +1,10 @@
+Package: libivy
+Version: @MAJOR@.@MINOR@.@MINOR2@
+Section: libs
+Priority: optional
+Architecture: amd64
+Homepage: <https://github.com/lii-enac/libivy>
+Depends:  pkg-config
+Maintainer: Mathieu Poirier <mathieu.poirier@enac.fr>
+Description: bus ivy
+ bus ivy 
