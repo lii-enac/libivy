@@ -1,0 +1,8 @@
+src/*.o
+src/build/*
+src/*.a
+src/*.so*
+src/libivy.pc
+tools/*.o
+tools/ivyprobe
+

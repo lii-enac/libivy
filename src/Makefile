@@ -18,7 +18,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=1
+MINOR2=2
 
 PERHAPS64 := $(shell getconf LONG_BIT | perl -ne "print /64/ ? '64' : '';")
 LIB = /lib$(PERHAPS64)
@@ -362,9 +362,9 @@ deb_destdir= $(shell pwd)/$(deb_destdir_version)
 deb:	
 	make installlibs installbins installliblinks includes installpkgconf DESTDIR=$(deb_destdir) PREFIX=$(deb_prefix)
 	test -d $(deb_destdir)$(deb_prefix_version)/DEBIAN || mkdir -p $(deb_destdir)$(deb_prefix_version)/DEBIAN
-	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' deb/control > $(deb_destdir)$(deb_prefix_version)/DEBIAN/control
+	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' distrib/deb/control > $(deb_destdir)$(deb_prefix_version)/DEBIAN/control
 # cp triggers file
-	cp deb/triggers $(deb_destdir)$(deb_prefix_version)/DEBIAN/triggers
+	cp distrib/deb/triggers $(deb_destdir)$(deb_prefix_version)/DEBIAN/triggers
 # remove debug symbol from library
 	cd $(deb_destdir)$(deb_prefix)$(LIB) ; strip --strip-debug --strip-unneeded *.so.$(MAJOR).$(MINOR)
 # remove rpath from library
