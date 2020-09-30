@@ -18,10 +18,9 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=2
+MINOR2=3
 
-PERHAPS64 := $(shell getconf LONG_BIT | perl -ne "print /64/ ? '64' : '';")
-LIB = /lib$(PERHAPS64)
+LIB = /lib
 
 # by default use fPIC on all systems
 FPIC ?= -fPIC
@@ -143,7 +142,7 @@ endif
 .cpp.o:
 	$(CPP) $(CFLAGS) $(BUGGY_DEBIAN_OPTION) -c $*.cpp
 
-all: static-libs shared-libs pkgconf  tools
+all: static-libs shared-libs pkgconf tools 
 libomp: libivy_omp.a libivy_omp.so.$(MAJOR).$(MINOR)
 omp: libomp
 	@(cd $(TOOLS_DIR) && $(MAKE) omp)
@@ -324,7 +323,7 @@ installdocs:
 	install -m 766 ../examples/button.tk				$(DESTDIR)$(PREFIX)/share/doc/ivy-c/examples
 	install -m 766 ../examples/unBind.tcl				$(DESTDIR)$(PREFIX)/share/doc/ivy-c/examples
 
-install: installlibs installbins installliblinks installdocs includes installpkgconf
+install: installlibs installbins installiblinks includes installpkgconf
 install_omp: installlibs_omp installbins_omp
 tools: static-libs
 	@(cd $(TOOLS_DIR) && $(MAKE))
@@ -357,7 +356,7 @@ installpkgconf: pkgconf
 # remove with:
 #		sudo dpkg -r libivy
 deb_destdir_version = build/deb/libivy_$(MAJOR).$(MINOR).$(MINOR2)
-deb_prefix = /usr
+deb_prefix = /usr/local
 deb_destdir= $(shell pwd)/$(deb_destdir_version)
 deb:	
 	make installlibs installbins installliblinks includes installpkgconf DESTDIR=$(deb_destdir) PREFIX=$(deb_prefix)
