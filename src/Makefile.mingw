@@ -65,7 +65,7 @@ export
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
 
-all: static-libs  shared-libs tools
+all: static-libs  shared-libs  installlibs #tools 
 
 static-libs: libivy.a libgivy.a
 #static-libs: libivy.a libgivy.a libtclivy.a  
@@ -163,16 +163,16 @@ installlibs: static-libs shared-libs
 	test -d $(PREFIX)/usr/X11R6/lib || mkdir -p $(PREFIX)/usr/X11R6/lib
 	test -d $(PREFIX)/usr/include || mkdir -p $(PREFIX)/usr/include
 	install -m644 libivy.a $(PREFIX)/usr/lib
-	install -m644 libgivy.a $(PREFIX)/usr/lib
-	install -m644 libxtivy.a $(PREFIX)/usr/X11R6/lib
-	install -m644 libtclivy.a $(PREFIX)/usr/lib
-	install -m644 libgtkivy.a $(PREFIX)/usr/X11R6/lib
+#	install -m644 libgivy.a $(PREFIX)/usr/lib
+#	install -m644 libxtivy.a $(PREFIX)/usr/X11R6/lib
+#	install -m644 libtclivy.a $(PREFIX)/usr/lib
+#	install -m644 libgtkivy.a $(PREFIX)/usr/X11R6/lib
 
 	install -m644 libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
-	install -m644 libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
-	install -m644 libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
-	install -m644 libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
-	install -m644 libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
+#	install -m644 libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+#	install -m644 libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
+#	install -m644 libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+#	install -m644 libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
 
 	install -m644 *.h $(PREFIX)/usr/include
 
@@ -182,12 +182,12 @@ installliblinks: installlibs
 	ln -s /usr/lib/libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libivy.so.$(MAJOR)
 	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so
 	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so.$(MAJOR)
-	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so
-	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so.$(MAJOR)
-	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so
-	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so.$(MAJOR)
-	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so
-	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so.$(MAJOR)
+#	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so
+#	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so.$(MAJOR)
+#	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so
+#	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so.$(MAJOR)
+#	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so
+#	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so.$(MAJOR)
 
 
 installbins: 

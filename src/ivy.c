@@ -24,12 +24,13 @@
 #endif
 
 #include <stdlib.h>
-#ifdef WIN32
+#ifdef __MINGW32__
+#include <sys/time.h>
 #include <Ws2tcpip.h>
 #include <windows.h>
 #include "timer.h"
 #define snprintf _snprintf
-#ifdef __MINGW32__
+#if 0 //def __MINGW32__
 // should be removed in when defined in MinGW include of ws2tcpip.h
 extern const char * WSAAPI inet_ntop(int af, const void *src,
                              char *dst, socklen_t size);
@@ -67,6 +68,20 @@ extern int WSAAPI inet_pton(int af, const char *src, void *dst);
 #define DEFAULT_DOMAIN 127.0.0.1
 #else
 #define DEFAULT_DOMAIN 127.255.255.255
+#endif
+
+#ifdef __MINGW32__
+#ifndef timersub
+#define timersub(a, b, result)\
+	do {												\
+		(result)->tv_sec = (a)->tv_sec - (b)->tv_sec;	\
+		(result)->tv_usec = (a)->tv_usec - (b)->tv_usec;\
+	if ((result)->tv_usec < 0) {						\
+		--(result)->tv_sec;								\
+	  (result)->tv_usec += 1000000;						\
+	}													\
+	} while (0)
+#endif
 #endif
 
 /* stringification et concatenation du domaine et du port en 2 temps :

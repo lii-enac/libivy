@@ -36,7 +36,7 @@ void TimerRemove( TimerId id );
 
 
  //  implemetation of gettimeofday for windows
-#ifdef WIN32
+#if 0 //def WIN32
 #include "time.h"
 struct timezone 
 {

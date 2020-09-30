@@ -111,9 +111,9 @@ static Client clients_list = NULL;
 
 static int debug_send = 0;
 
-#ifdef WIN32
+/*#ifdef WIN32
 WSADATA	WsaData;
-#endif
+#endif*/
 
 
 static SendState BufferizedSocketSendRaw (const Client client, const char *buffer, const int len );
