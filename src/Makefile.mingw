@@ -211,3 +211,19 @@ tools: static-libs
 rpm::
 	/usr/bin/rpmize
 
+
+#https://www.msys2.org/
+#pkgdeps := git make pkg-config
+pkgcmd := pacman -S --needed
+pkgupg := pacman -Syu --needed
+
+mgwpkgdeps += pcre gcc
+mgwpkgdeps := $(addprefix mingw-w64-x86_64-, $(mgwpkgdeps))
+pkgdeps += $(mgwpkgdeps)
+
+install-pkgdeps:
+	$(pkgcmd) $(pkgdeps)
+
+upgrade-pkgdeps:
+	$(pkgupg) $(pkgdeps)
+
