@@ -349,7 +349,7 @@ installpkgconf: pkgconf
 
 #note: 
 # use dpkg-depcheck -d make to find out all dependency on libivy
-# last tryon ubuntu 18_04: 
+# last try on ubuntu 20_04: 
 #      	pkg-config
 # install with:
 #		sudo dpkg -i libivy_x.x.deb

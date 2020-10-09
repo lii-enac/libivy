@@ -16,8 +16,11 @@
 #
 
 
+# change this in version.h too !!!!
 MAJOR=3
-MINOR=11
+MINOR=15
+MINOR2=3
+
 #RM=del
 RM=rm -f
 XTINC = 
@@ -65,7 +68,7 @@ export
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
 
-all: static-libs  shared-libs  installlibs #tools 
+all: static-libs  shared-libs #installlibs #tools 
 
 static-libs: libivy.a libgivy.a
 #static-libs: libivy.a libgivy.a libtclivy.a  
@@ -159,29 +162,31 @@ clean:
 	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw clean)
 
 installlibs: static-libs shared-libs
-	test -d $(PREFIX)/usr/lib || mkdir -p $(PREFIX)/usr/lib
-	test -d $(PREFIX)/usr/X11R6/lib || mkdir -p $(PREFIX)/usr/X11R6/lib
-	test -d $(PREFIX)/usr/include || mkdir -p $(PREFIX)/usr/include
-	install -m644 libivy.a $(PREFIX)/usr/lib
+	test -d $(DESTDIR)$(PREFIX)/lib || mkdir -p $(DESTDIR)$(PREFIX)/lib
+#	test -d $(PREFIX)/usr/X11R6/lib || mkdir -p $(PREFIX)/usr/X11R6/lib
+	test -d $(DESTDIR)$(PREFIX)/include || mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
+	install -m644 libivy.a $(DESTDIR)$(PREFIX)/lib
 #	install -m644 libgivy.a $(PREFIX)/usr/lib
 #	install -m644 libxtivy.a $(PREFIX)/usr/X11R6/lib
 #	install -m644 libtclivy.a $(PREFIX)/usr/lib
 #	install -m644 libgtkivy.a $(PREFIX)/usr/X11R6/lib
 
-	install -m644 libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
+# 	install -m644 libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib
+	install -m644 libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so
+
 #	install -m644 libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
 #	install -m644 libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
 #	install -m644 libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
 #	install -m644 libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
 
-	install -m644 *.h $(PREFIX)/usr/include
+	install -m644 *.h  $(DESTDIR)$(PREFIX)/include/Ivy
 
 installliblinks: installlibs
-	ln -s /usr/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libtclivy.so
-	ln -s /usr/lib/libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libivy.so
-	ln -s /usr/lib/libivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libivy.so.$(MAJOR)
-	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so
-	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so.$(MAJOR)
+#	ln -s /usr/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libtclivy.so
+	ln -fs $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so
+	ln -fs $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR)
+#	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so
+#	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so.$(MAJOR)
 #	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so
 #	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so.$(MAJOR)
 #	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so
@@ -210,6 +215,59 @@ tools: static-libs
 
 rpm::
 	/usr/bin/rpmize
+
+pkgconf:
+	for f in ivy-c.pc.in ; do \
+		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+	done
+
+installpkgconf: pkgconf
+	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
+	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig
+
+#----------------------------------------
+# package builder
+
+#pkg
+
+#note: 
+#      	makepkg
+# install with:
+#		pacman -U libivy.pkg 
+# remove with:
+#		pacman -Rs libivy
+pkg_destdir_version = build/pkg/libivy_$(MAJOR).$(MINOR).$(MINOR2)
+ifeq ($(PREFIX),)
+pkg_prefix = /usr
+else
+pkg_prefix = $(PREFIX)
+endif
+ifeq ($(DESTDIR),) 
+pkg_destdir= $(shell pwd)/$(pkg_destdir_version)
+else
+pkg_destdir = $(DESTDIR)
+endif
+pkg:
+#	makepkg --skipinteg
+#   for test only	
+#	make -f Makefile.mingw DESTDIR=$(pkg_destdir) PREFIX=$(pkg_prefix) installlibs  installpkgconf  #installliblinks
+	test -d build || mkdir -p build
+	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' distrib/PKGBUILD.proto > build/PKGBUILD
+	cd build ; makepkg --skipinteg 
+## cp triggers file
+#	cp distrib/pkg/triggers $(pkg_destdir)$(pkg_prefix_version)/pkgIAN/triggers
+# remove pkgug symbol from library
+#	cd $(pkg_destdir)$(pkg_prefix)$(LIB) ; strip --strip-pkgug --strip-unneeded *.so.$(MAJOR).$(MINOR)
+# remove rpath from library
+#	cd $(pkg_prefix)/lib ; chrpath -d *.so
+# build package with fakeroot
+#	cd "build/pkg" ; fakeroot dpkg-pkg --build libivy_$(MAJOR).$(MINOR).$(MINOR2)
+# check integrity of the build package. We still have error
+#	cd "build/pkg" ; lintian djnn-cpp_$(MAJOR).$(MINOR).$(MINOR2).pkg
+.PHONY: pkg
+
+
+
 
 
 #https://www.msys2.org/
