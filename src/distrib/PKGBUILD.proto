@@ -24,33 +24,33 @@ backup=()
 options=()
 install=
 changelog= 
-#source=("https://github.com/lii-enac/$pkgname/archive/$pkgver.tar.gz")
-#source=("https://github.com/lii-enac/libivy/archive/3.15.3.tar.gz")
-#source=("https://codeload.github.com/lii-enac/libivy/tar.gz/3.15.3")
-source=("$pkgname-$pkgver.tar.gz")
+source=("https://github.com/lii-enac/$pkgname/archive/$pkgver.tar.gz")
+#source=("$pkgname-$pkgver.tar.gz")
 noextract=()
 #if needed use makepkg -g
 md5sums=("")
 validpgpkeys=()
 
 prepare() {
-#	cd "$pkgname-$pkgver"
-	cd "$pkgname"
+	cd "$pkgname-$pkgver"
+#	cd "$pkgname"
 }
 
 build() {
-#	cd "$pkgname-$pkgver"/src
-	cd "$pkgname"/src
+	cd "$pkgname-$pkgver"/src
+#	cd "$pkgname"/src
 	make -f Makefile.mingw
 }
 
 check() {
-#	cd "$pkgname-$pkgver"
-	cd "$pkgname"
+	cd "$pkgname-$pkgver"
+#	cd "$pkgname"
 #	make -k check
 }
 
 package() {
-	cd "$pkgname"/src
+	cd "$pkgname-$pkgver"/src
+	echo $pkgdir
+	#	cd "$pkgname"
 	make -f Makefile.mingw DESTDIR="$pkgdir/" PREFIX="/usr" installlibs  installpkgconf
 }

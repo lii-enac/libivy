@@ -248,22 +248,11 @@ else
 pkg_destdir = $(DESTDIR)
 endif
 pkg:
-#	makepkg --skipinteg
 #   for test only	
 #	make -f Makefile.mingw DESTDIR=$(pkg_destdir) PREFIX=$(pkg_prefix) installlibs  installpkgconf  #installliblinks
 	test -d build || mkdir -p build
 	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' distrib/PKGBUILD.proto > build/PKGBUILD
 	cd build ; makepkg --skipinteg 
-## cp triggers file
-#	cp distrib/pkg/triggers $(pkg_destdir)$(pkg_prefix_version)/pkgIAN/triggers
-# remove pkgug symbol from library
-#	cd $(pkg_destdir)$(pkg_prefix)$(LIB) ; strip --strip-pkgug --strip-unneeded *.so.$(MAJOR).$(MINOR)
-# remove rpath from library
-#	cd $(pkg_prefix)/lib ; chrpath -d *.so
-# build package with fakeroot
-#	cd "build/pkg" ; fakeroot dpkg-pkg --build libivy_$(MAJOR).$(MINOR).$(MINOR2)
-# check integrity of the build package. We still have error
-#	cd "build/pkg" ; lintian djnn-cpp_$(MAJOR).$(MINOR).$(MINOR2).pkg
 .PHONY: pkg
 
 
