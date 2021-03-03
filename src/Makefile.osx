@@ -174,7 +174,7 @@ clean:
 
 pkgconf:
 	for f in *.pc.in ; do \
-		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > $$(echo $$f | cut -f 1,2 -d .); \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf

@@ -18,7 +18,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=4
+MINOR2=5
 
 LIB = /lib
 
@@ -334,7 +334,7 @@ rpm::
 
 pkgconf:
 	for f in ivy-c.pc.in ; do \
-		sed -e 's,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf
