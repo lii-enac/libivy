@@ -84,9 +84,9 @@ libomp: libivy_omp.a
 omp: libomp
 	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.osx omp)
 
-static-libs: libivy.a libglibivy.a
+static-libs: libivy.a #libglibivy.a
 
-shared-libs: libivy.dylib libglibivy.dylib
+shared-libs: libivy.dylib #libglibivy.dylib
 
 ivybind.o: ivybind.c
 	$(CC) -c $(CFLAGS) $(REGEXP) $(PCREINC) ivybind.c
@@ -131,11 +131,11 @@ libglibivy.dylib: $(GLIBOBJ)
 installlibs: static-libs shared-libs
 	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
 	install_name_tool -id $(PREFIX)/lib/libivy.dylib libivy.dylib
-	install_name_tool -id $(PREFIX)/lib/libglibivy.dylib libglibivy.dylib
+	#install_name_tool -id $(PREFIX)/lib/libglibivy.dylib libglibivy.dylib
 	install -m644 libivy.a		$(DESTDIR)$(PREFIX)/lib/
 	install -m644 libivy.dylib	$(DESTDIR)$(PREFIX)/lib/
-	install -m644 libglibivy.a	$(DESTDIR)$(PREFIX)/lib/
-	install -m644 libglibivy.dylib	$(DESTDIR)$(PREFIX)/lib/
+	#install -m644 libglibivy.a	$(DESTDIR)$(PREFIX)/lib/
+	#install -m644 libglibivy.dylib	$(DESTDIR)$(PREFIX)/lib/
 
 includes:
 	test -d $(DESTDIR)$(PREFIX)/include/Ivy || mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
@@ -149,7 +149,7 @@ includes:
 	install -m644 list.h		$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 timer.h		$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 version.h		$(DESTDIR)$(PREFIX)/include/Ivy/
-	install -m644 ivyglibloop.h	$(DESTDIR)$(PREFIX)/include/Ivy/
+	#install -m644 ivyglibloop.h	$(DESTDIR)$(PREFIX)/include/Ivy/
 
 installbins: tools
 	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin

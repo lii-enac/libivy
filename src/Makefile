@@ -18,7 +18,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=5
+MINOR2=6
 
 LIB = /lib
 
@@ -129,10 +129,10 @@ TCLOBJ = ivytcl.o  timer.o ivysocket.o givy.o ivybuffer.o ivyfifo.o ivybind.o in
 TARGETLIBS=libivy.so.$(MAJOR).$(MINOR) #libgivy.so.$(MAJOR).$(MINOR) libxtivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
 STATICTARGETLIBS=libivy.a #libgivy.a libxtivy.a libtclivy.a
 
-ifeq ($(HAVE_GLIB),yes)
-		TARGETLIBS += libglibivy.so.$(MAJOR).$(MINOR)
-		STATICTARGETLIBS += libglibivy.a
-endif
+# ifeq ($(HAVE_GLIB),yes)
+# 		TARGETLIBS += libglibivy.so.$(MAJOR).$(MINOR)
+# 		STATICTARGETLIBS += libglibivy.a
+# endif
 
 
 # not yet need Modified Glut ivyglutprobe
@@ -267,8 +267,8 @@ installlibs_omp: static-libs shared-libs
 	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
 	-test -d $(DESTDIR)$(X11_PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(X11_PREFIX)$(LIB)
 
-	install -m644 libivy_omp.a					$(DESTDIR)$(PREFIX)$(LIB)
-	install -m644 libivy_omp.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
+	#install -m644 libivy_omp.a					$(DESTDIR)$(PREFIX)$(LIB)
+	#install -m644 libivy_omp.so.$(MAJOR).$(MINOR)			$(DESTDIR)$(PREFIX)$(LIB)
 
 includes:
 	test -d $(DESTDIR)$(PREFIX)/include/Ivy || mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
@@ -277,8 +277,8 @@ includes:
 	install -m644 ivybuffer.h					$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 ivychannel.h					$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 ivydebug.h					$(DESTDIR)$(PREFIX)/include/Ivy/
-	install -m644 ivyglibloop.h					$(DESTDIR)$(PREFIX)/include/Ivy/
-	install -m644 ivyglutloop.h*					$(DESTDIR)$(PREFIX)/include/Ivy/
+	#install -m644 ivyglibloop.h					$(DESTDIR)$(PREFIX)/include/Ivy/
+	#install -m644 ivyglutloop.h*					$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 ivyloop.h						$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 ivysocket.h					$(DESTDIR)$(PREFIX)/include/Ivy/
 	install -m644 ivytcl.h*						$(DESTDIR)$(PREFIX)/include/Ivy/

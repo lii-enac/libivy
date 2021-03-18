@@ -19,7 +19,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=5
+MINOR2=6
 
 #RM=del
 RM=rm -f
