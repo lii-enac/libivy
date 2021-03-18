@@ -173,7 +173,7 @@ clean:
 # ------------------------------------------------------------------------------------------
 
 pkgconf:
-	for f in *.pc.in ; do \
+	for f in ivy-c.pc.in ; do \
 		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
