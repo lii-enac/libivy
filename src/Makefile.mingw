@@ -19,7 +19,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=6
+MINOR2=7
 
 #RM=del
 RM=rm -f
@@ -70,11 +70,13 @@ export
 
 all: static-libs  shared-libs #installlibs #tools 
 
-static-libs: libivy.a libgivy.a
+static-libs: libivy.a 
+#libgivy.a
 #static-libs: libivy.a libgivy.a libtclivy.a  
 # not yiet libxtivy.a libgtkivy.a  need Modified Glut libglutivy.a
 
-shared-libs: libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR)
+shared-libs: libivy.so.$(MAJOR).$(MINOR) 
+# libgivy.so.$(MAJOR).$(MINOR)
 #shared-libs: libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
 # not yiet libxtivy.so.$(MAJOR).$(MINOR) libgtkivy.so.$(MAJOR).$(MINOR) need Modified Glut libglutivy.so.$(MAJOR).$(MINOR)
 
@@ -218,7 +220,7 @@ rpm::
 
 pkgconf:
 	for f in ivy-c.pc.in ; do \
-		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,"/usr",; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf
@@ -255,10 +257,6 @@ pkg:
 	cd build ; makepkg --skipinteg 
 .PHONY: pkg
 
-
-
-
-
 #https://www.msys2.org/
 #pkgdeps := git make pkg-config
 pkgcmd := pacman -S --needed
@@ -273,4 +271,7 @@ install-pkgdeps:
 
 upgrade-pkgdeps:
 	$(pkgupg) $(pkgdeps)
+
+clear:
+	rm -rf build
 
