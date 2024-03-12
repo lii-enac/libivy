@@ -2,12 +2,12 @@
  *
  *	Ivy, C interface
  *
- *	Copyright 1997-2008
+ *	Copyright 1997-2024
  *	Centre d'Etudes de la Navigation Aerienne
  *
  *	Main functions
  *
- *	Authors: Francois-Regis Colin,Stephane Chatty, Alexandre Bustico
+ *	Authors: Francois-Regis Colin,Stephane Chatty, Alexandre Bustico, Mathieu Poirier
  *
  *	$Id: ivy.c 3602 2014-04-07 08:35:53Z bustico $
  *
@@ -730,7 +730,8 @@ static void Receive( Client client, const void *data, char *line )
 			if ( application_die_callback)
 				(*application_die_callback)( clnt, application_die_user_data, id );
 			IvyCleanup();
-			exit(0);
+			//exit(0);
+			IvyChannelStop (); // quit properly the mainloop instead of wildly exit the process
 			break;
 
 		case Ping:
