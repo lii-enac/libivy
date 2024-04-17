@@ -1,7 +1,7 @@
 TARGETS = ivyprobe #ivythroughput ivytestready ivyperf ivyglibprobe ivyxtprobe #ivyprobe_efence 
 OMP_TARGET= ivyprobe_omp ivythroughput_omp 
 
-PCRELIB = `pcre-config --libs`
+PCRELIB = -lpcre
 EXTRALIB= -L../src
 EXTRAINC=-I../src
 
@@ -16,7 +16,7 @@ EXTRAINC=-I../src
 all: $(TARGETS)
 omp: $(OMP_TARGET)
 
-ivyprobe: ivyprobe.o ../src/libivy.a
+ivyprobe: ivyprobe.o
 	$(CC)  $(CFLAGS) $(EXTRAINC) -o $@ ivyprobe.o  $(EXTRALIB) -livy $(PCRELIB)  
 
 ivythroughput: ivythroughput.o ../src/libivy.a

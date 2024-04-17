@@ -66,8 +66,8 @@ TCLLIB = -ltcl$(TCLVERS)
 # use these if you want to use Aqua Tcl on macOSX
 #TCLINC = -I/Library/Frameworks/Tcl.framework/Headers
 #TCLLIB = -framework Tcl
-PCREINC = $(shell pcre-config --cflags)
-PCRELIB = $(shell pcre-config --libs)
+PCREINC = #$(shell pcre-config --cflags)
+PCRELIB = -lpcre #$(shell pcre-config --libs)
 CASESENSITIVE = "yes"
 ifeq ($(CASESENSITIVE), "no")
 	PCRE_OPT=PCRE_CASELESS
@@ -208,6 +208,7 @@ libtclivy.a: $(TCLOBJ)
 
 libivy.so.$(MAJOR).$(MINOR): $(OBJ)
 	$(CC) $(LDFLAGS) -shared -Wl,-soname,libivy.so.$(MAJOR) -o $@ $(OBJ) $(PCRELIB)
+	ln -fs libivy.so.$(MAJOR).$(MINOR)	libivy.so
 #	$(CC) -G -Wl,-h,libivy.so.$(MAJOR) -o $@ $(OBJ)		#solaris
 #	libtool -dynamic -o $@ $(OBJ) $(PCRELIB) -lc
 
@@ -249,11 +250,11 @@ clean:
 	@(cd $(TOOLS_DIR) && $(MAKE) clean)
 
 
-installlibs: static-libs shared-libs
+installlibs: shared-libs
 	test -d $(DESTDIR)$(PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(PREFIX)$(LIB)
 #-test -d $(DESTDIR)$(X11_PREFIX)$(LIB)  || mkdir -p $(DESTDIR)$(X11_PREFIX)$(LIB)
 
-	install -m644 libivy.a						$(DESTDIR)$(PREFIX)$(LIB)
+#	install -m644 libivy.a						$(DESTDIR)$(PREFIX)$(LIB)
 #	install -m644 libgivy.a						$(DESTDIR)$(PREFIX)$(LIB)
 #	-install -m644 libxtivy.a					$(DESTDIR)$(X11_PREFIX)$(LIB)
 #	install -m644 libtclivy.a					$(DESTDIR)$(PREFIX)$(LIB)
