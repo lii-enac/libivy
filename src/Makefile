@@ -323,7 +323,7 @@ installdocs:
 	install -m 766 ../examples/button.tk				$(DESTDIR)$(PREFIX)/share/doc/ivy-c/examples
 	install -m 766 ../examples/unBind.tcl				$(DESTDIR)$(PREFIX)/share/doc/ivy-c/examples
 
-install: installlibs installbins installiblinks includes installpkgconf
+install: installlibs installbins installliblinks includes installpkgconf
 install_omp: installlibs_omp installbins_omp
 tools: static-libs
 	@(cd $(TOOLS_DIR) && $(MAKE))
