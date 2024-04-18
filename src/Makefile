@@ -2,12 +2,12 @@
 #	Ivy, C interface
 #
 #	Copyright (C) 1997-2002
-#	Centre d'Études de la Navigation Aérienne
+#	Centre d'ï¿½tudes de la Navigation Aï¿½rienne
 #
 #	Makefile
 #
-#	Authors: François-Régis Colin <fcolin@cena.fr>
-#		 Stéphane Chatty <chatty@cena.fr>
+#	Authors: Franï¿½ois-Rï¿½gis Colin <fcolin@cena.fr>
+#		 Stï¿½phane Chatty <chatty@cena.fr>
 #		 Yannick Jestin <jestin@cena.fr>
 #
 #	Please refer to file version.h for the
@@ -18,7 +18,7 @@
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
-MINOR2=8
+MINOR2=9
 
 LIB = /lib
 
@@ -288,8 +288,8 @@ includes:
 	install -m644 version.h						$(DESTDIR)$(PREFIX)/include/Ivy/
 
 installliblinks: installlibs
-	ln -fs $(PREFIX)$(LIB)/libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so
-	ln -fs $(PREFIX)$(LIB)/libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so.$(MAJOR)
+	ln -fs libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so
+	ln -fs libivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy.so.$(MAJOR)
 # 	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so
 # 	ln -fs $(PREFIX)$(LIB)/libgivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libgivy.so.$(MAJOR)
 # 	-ln -fs $(X11_PREFIX)$(LIB)/libxtivy.so.$(MAJOR).$(MINOR)	$(DESTDIR)$(X11_PREFIX)$(LIB)/libxtivy.so
