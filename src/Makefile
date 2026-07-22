@@ -2,12 +2,12 @@
 #	Ivy, C interface
 #
 #	Copyright (C) 1997-2002
-#	Centre d'�tudes de la Navigation A�rienne
+#	Centre d'études de la Navigation Aérienne
 #
 #	Makefile
 #
-#	Authors: Fran�ois-R�gis Colin <fcolin@cena.fr>
-#		 St�phane Chatty <chatty@cena.fr>
+#	Authors: François-Régis Colin <fcolin@cena.fr>
+#		 Stéphane Chatty <chatty@cena.fr>
 #		 Yannick Jestin <jestin@cena.fr>
 #
 #	Please refer to file version.h for the
