@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/types.h>
 #ifdef WIN32
@@ -146,23 +147,31 @@ unsigned int IvyFifoGenericRead (IvyFifoBuffer *f, const unsigned int buf_size, 
 
 unsigned int IvyFifoSendSocket (IvyFifoBuffer *f, const int fd)
 {
-  unsigned int  maxLen, realLen;
-  
-  do {
-    maxLen = MIN ((unsigned int)(f->end - f->rptr), IvyFifoLength(f));
+  while (IvyFifoLength(f) > 0) {
+    unsigned int maxLen = MIN((unsigned int)(f->end - f->rptr), IvyFifoLength(f));
 #ifdef WIN32
-    realLen = send (fd, f->rptr, maxLen, 0);
+    int realLen = send(fd, f->rptr, maxLen, 0);
 #else
-	realLen = send (fd, f->rptr, maxLen, MSG_DONTWAIT);
+    ssize_t realLen = send(fd, f->rptr, maxLen, MSG_DONTWAIT);
 #endif
-    IvyFifoDrain(f, realLen);
-    //    printf ("DBG> maxLen=%d realLen=%d IvyFifoLength=%d\n",
-    //    maxLen, realLen, IvyFifoLength(f));
-  } while (IvyFifoLength(f) && (maxLen == realLen));
-
-  return (IvyFifoLength(f));
+    if (realLen < 0) {
+#ifdef WIN32
+      int error = WSAGetLastError();
+      if (error == WSAEINTR) continue;
+      if (error == WSAEWOULDBLOCK) break;
+#else
+      if (errno == EINTR) continue;
+      if (errno == EAGAIN || errno == EWOULDBLOCK) break;
+#endif
+      return IVY_FIFO_SEND_ERROR;
+    }
+    /* With pending bytes, a zero-length send makes no progress. */
+    if (realLen == 0) return IVY_FIFO_SEND_ERROR;
+    IvyFifoDrain(f, (int)realLen);
+    if ((unsigned int)realLen < maxLen) break;
+  }
+  return IvyFifoLength(f);
 }
-
 
 
 void IvyFifoDrain (IvyFifoBuffer *f, int size)

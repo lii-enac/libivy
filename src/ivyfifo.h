@@ -24,6 +24,8 @@ unsigned int IvyFifoAvail(const IvyFifoBuffer  *f);
 
 unsigned int IvyFifoRead(IvyFifoBuffer *f, char *buf, unsigned int buf_size);
 
+/* Remaining byte count, or IVY_FIFO_SEND_ERROR on a fatal send failure. */
+#define IVY_FIFO_SEND_ERROR ((unsigned int)-1)
 unsigned int IvyFifoSendSocket (IvyFifoBuffer *f, const int fd);
 
 int IvyFifoIsFull (const IvyFifoBuffer  *f) ;

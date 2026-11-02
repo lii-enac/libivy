@@ -99,3 +99,10 @@ per message. Messages exceeding that limit are rejected in full, without calling
 the application callback; the connection remains usable. `make check` and
 `make sanitize` test this limit, empty arguments and reception after rejection,
 without opening network sockets.
+
+The send FIFO retains unsent data on `EAGAIN`/`EWOULDBLOCK` and retries `EINTR`.
+Only bytes actually sent are removed. Fatal errors (or a zero-byte send with
+pending data) close the connection rather than reporting successful delivery.
+`IvyFifoSendSocket` returns the remaining byte count, or `IVY_FIFO_SEND_ERROR`
+on failure. Tests simulate congestion, interruptions, partial writes and ring
+buffer wrap without network sockets.

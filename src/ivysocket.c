@@ -219,8 +219,13 @@ static void HandleSocket (Channel channel, IVY_HANDLE fd, void *data)
 static void HandleCongestionWrite (Channel channel, IVY_HANDLE fd, void *data)
 {
   Client client = (Client)data;
-  
-  if (IvyFifoSendSocket (client->ifb, fd) == 0) {
+  unsigned int remaining = IvyFifoSendSocket(client->ifb, fd);
+
+  if (remaining == IVY_FIFO_SEND_ERROR) {
+    SocketClose(client);
+    return;
+  }
+  if (remaining == 0) {
     // Not congestionned anymore
     IvyChannelClearWritableEvent (channel);
     //    printf ("DBG> Socket *DE*congestionnee\n");

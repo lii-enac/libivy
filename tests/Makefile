@@ -8,10 +8,11 @@ BUILD_DIR ?= build
 REGEX_FLAGS = -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 
 .PHONY: check sanitize clean
-check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery $(BUILD_DIR)/receive
+check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery $(BUILD_DIR)/receive $(BUILD_DIR)/fifo
 	./$(BUILD_DIR)/regex
 	./$(BUILD_DIR)/discovery
 	./$(BUILD_DIR)/receive
+	./$(BUILD_DIR)/fifo
 
 $(BUILD_DIR)/regex: regex.c $(IVYBIND) ../src/ivybind.h
 	mkdir -p $(BUILD_DIR)
@@ -57,3 +58,9 @@ $(BUILD_DIR)/receive: receive.c ../src/ivy.c ../src/ivydiscovery.h $(RECEIVE_SOU
 	$(CC) $(CPPFLAGS) $(RECEIVE_CPPFLAGS) $(CFLAGS) $(REGEX_FLAGS) -I../src \
 		$(shell $(PKG_CONFIG) --cflags $(PCRE_PKG)) receive.c $(RECEIVE_SOURCES) \
 		-o $@ $(LDFLAGS) $(shell $(PKG_CONFIG) --libs $(PCRE_PKG)) $(RECEIVE_LIBS)
+
+FIFO_SUPPORT = ../src/timer.c ../src/ivybuffer.c ../src/param.c
+$(BUILD_DIR)/fifo: fifo.c ../src/ivyfifo.c ../src/ivysocket.c ../src/ivyloop.c $(FIFO_SUPPORT) $(wildcard ../src/*.h)
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(RECEIVE_CPPFLAGS) $(CFLAGS) -I../src fifo.c $(FIFO_SUPPORT) \
+		-o $@ $(LDFLAGS) $(RECEIVE_LIBS)
