@@ -2,8 +2,10 @@ src/*.o
 src/build/*
 src/*.a
 src/*.so*
+src/*.dylib
 src/libivy.pc
 tools/*.o
 tools/ivyprobe
 
 tests/build*/
+*.diff
