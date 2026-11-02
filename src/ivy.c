@@ -1722,7 +1722,9 @@ static void addRegexpToDictionary (const char* regexp, IvyClientPtr client)
     
     msgSendDict->binding = IvyBindingCompile(regexp, & erroffset, & errbuf );
     if (msgSendDict->binding  == NULL ) {
-			sprintf( errorbuffer, "Error compiling '%s', %s", regexp, errbuf); 
+      snprintf(errorbuffer, sizeof(errorbuffer), "Error compiling '%s', %s", regexp, errbuf);
+      /* Legacy Windows _snprintf does not terminate a truncated result. */
+      errorbuffer[sizeof(errorbuffer) - 1] = '\0';
       printf("%s\n", errorbuffer);
       MsgSendTo(client, Error, erroffset, errorbuffer );
     }

@@ -2,7 +2,26 @@
  * Including ivy.c gives this test access to its private receiver and registry.
  */
 #include <assert.h>
+/* Capture error replies without opening a socket. */
+#define SocketSend test_socket_send
 #include "../src/ivy.c"
+#undef SocketSend
+
+static char last_reply[2048];
+static int reply_count;
+
+SendState test_socket_send(Client client, const char *fmt, ...)
+{
+    va_list args;
+    int length;
+    (void)client;
+    va_start(args, fmt);
+    length = vsnprintf(last_reply, sizeof(last_reply), fmt, args);
+    va_end(args);
+    assert(length >= 0 && (size_t)length < sizeof(last_reply));
+    ++reply_count;
+    return SendOk;
+}
 
 static int callback_count;
 static int expected_argc;
@@ -49,6 +68,42 @@ static void receive_arguments(int count, int empty)
     free(line);
 }
 
+static void check_invalid_regexp(size_t length)
+{
+    struct _clnt_lst_dict client = {0};
+    MsgSndDictPtr entry = NULL;
+    char *pattern = (char *)malloc(length + 1);
+    const char *error_text;
+    int type, offset;
+    assert(pattern != NULL && length > 0);
+    memset(pattern, 'a', length);
+    pattern[length - 1] = '(';
+    pattern[length] = '\0';
+    client.app_name = "regex-error-test";
+    client.id = 77;
+    reply_count = 0;
+    addRegexpToDictionary(pattern, &client);
+    assert(reply_count == 1);
+    assert(sscanf(last_reply, "%d %d", &type, &offset) == 2);
+    assert(type == Error && offset == (int)length);
+    error_text = strchr(last_reply, *ARG_START);
+    assert(error_text != NULL);
+    ++error_text;
+    assert(strncmp(error_text, "Error compiling '", 17) == 0);
+    /* Includes the final wire newline, but not the terminating NUL. */
+    assert(strlen(error_text) <= 1024);
+    assert(last_reply[strlen(last_reply) - 1] == '\n');
+    if (length < 100) {
+        assert(strstr(error_text, pattern) != NULL);
+        assert(strstr(error_text, "missing closing parenthesis") != NULL);
+    }
+    HASH_FIND_STR(messSndByRegexp, pattern, entry);
+    assert(entry != NULL);
+    delOneClientFromDictionaryEntry(entry, client.client);
+    assert(messSndByRegexp == NULL);
+    free(pattern);
+}
+
 int main(void)
 {
     struct _msg_rcv receiver = {0};
@@ -69,6 +124,11 @@ int main(void)
     receive_arguments(500, 0);
     receive_arguments(MAX_MATCHING_ARGS, 1);
     msg_recv = NULL;
+    puts("[TEST] Invalid regex error replies: compilation errors below are expected.");
+    fflush(stdout);
+    check_invalid_regexp(4);
+    check_invalid_regexp(2001);
+    puts("Ivy receive: short and oversized regex error replies passed");
     puts("Ivy receive: argument limits, empty captures and recovery passed");
     return 0;
 }
