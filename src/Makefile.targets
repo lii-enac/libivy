@@ -11,6 +11,15 @@ help:
 	@echo "  make pkgconf          generate pkg-config metadata"
 	@echo "  make install PREFIX=/path   install libraries, headers and tools"
 	@echo ""
+	@echo "Packaging:"
+	@echo "  make deb / deb_git    build Debian packages from the local working tree"
+	@echo "  make deb_verify       inspect a Debian package (and run lintian if installed)"
+	@echo "  make pkg              build a MinGW64 package from a checksummed release"
+	@echo "  make pkg_git          build a MinGW64 package from a Git branch"
+	@echo "  make pkg_verify       inspect a pacman package"
+	@echo "  make check-packaging  validate recipes with fixture tools (requires Python 3)"
+	@echo "  make clean_packages   remove packaging outputs"
+	@echo ""
 	@echo "Cleaning:"
 	@echo "  make clean            remove generated libraries, objects, tools and test builds"
 	@echo ""
@@ -45,3 +54,9 @@ version:
 
 # Rebuild version-dependent objects after a release version change.
 $(sort $(OBJ) $(OMPOBJ) $(GOBJ) $(XTOBJ) $(GLIBOBJ) $(GLUTOBJ) $(TCLOBJ)): version.h
+
+include ../distrib/packages.mk
+
+.PHONY: check-packaging
+check-packaging:
+	python3 ../tests/packaging.py

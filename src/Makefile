@@ -303,7 +303,7 @@ installliblinks: installlibs
 # 	ln -fs $(PREFIX)$(LIB)/libtclivy.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libtclivy.so.$(MAJOR)
 # 	ln -fs $(PREFIX)$(LIB)/libivy_omp.so.$(MAJOR).$(MINOR)		$(DESTDIR)$(PREFIX)$(LIB)/libivy_omp.so
 
-installbins:
+installbins: tools
 	@(cd $(TOOLS_DIR) && $(MAKE) install)
 
 installbins_omp:
@@ -346,38 +346,6 @@ installpkgconf: pkgconf
 	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig
 
-
-#----------------------------------------
-# package builder
-
-#deb
-
-#note: 
-# use dpkg-depcheck -d make to find out all dependency on libivy
-# last try on ubuntu 20_04: 
-#      	pkg-config
-# install with:
-#		sudo dpkg -i libivy_x.x.deb
-# remove with:
-#		sudo dpkg -r libivy
-deb_destdir_version = build/deb/libivy_$(MAJOR).$(MINOR).$(MINOR2)
-deb_prefix = /usr/local
-deb_destdir= $(shell pwd)/$(deb_destdir_version)
-deb:	
-	make installlibs installbins installliblinks includes installpkgconf DESTDIR=$(deb_destdir) PREFIX=$(deb_prefix)
-	test -d $(deb_destdir)$(deb_prefix_version)/DEBIAN || mkdir -p $(deb_destdir)$(deb_prefix_version)/DEBIAN
-	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),' distrib/deb/control > $(deb_destdir)$(deb_prefix_version)/DEBIAN/control
-# cp triggers file
-	cp distrib/deb/triggers $(deb_destdir)$(deb_prefix_version)/DEBIAN/triggers
-# remove debug symbol from library
-	cd $(deb_destdir)$(deb_prefix)$(LIB) ; strip --strip-debug --strip-unneeded *.so.$(MAJOR).$(MINOR)
-# remove rpath from library
-#	cd $(deb_prefix)/lib ; chrpath -d *.so
-# build package with fakeroot
-	cd "build/deb" ; fakeroot dpkg-deb --build libivy_$(MAJOR).$(MINOR).$(MINOR2)
-# check integrity of the build package. We still have error
-#	cd "build/deb" ; lintian djnn-cpp_$(MAJOR).$(MINOR).$(MINOR2).deb
-.PHONY: deb
 
 include Makefile.targets
 endif

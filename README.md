@@ -90,10 +90,6 @@ unusual constructs should test their own regex corpus; see the
 [PCRE2 API](https://www.pcre.org/current/doc/html/pcre2api.html) and
 [pattern documentation](https://www.pcre.org/current/doc/html/pcre2pattern.html).
 
-Release packaging and the Homebrew formula still need a coordinated update to
-PCRE2 before publishing this migration. In particular, the existing Homebrew
-formula fetches the old 3.15.8 release and depends on `pcre`.
-
 Protocol reception accepts at most `MAX_MATCHING_ARGS` arguments (currently 120)
 per message. Messages exceeding that limit are rejected in full, without calling
 the application callback; the connection remains usable. `make check` and
@@ -116,3 +112,81 @@ the package templates and pkg-config files use the same full version.
 `make version` prints it from either the repository root or `src`.
 The shared-library filename and SONAME retain their existing major/minor format.
 The historical Debian changelog still tracks Debian package releases separately.
+
+## Debian packages
+
+Run on Debian/Ubuntu, from the repository root or `src`:
+
+```sh
+sudo apt install build-essential pkgconf libpcre2-dev dpkg-dev fakeroot
+make deb
+make deb_verify
+sudo apt install ./build/deb/libivy_*.deb
+```
+
+`make deb` packages the current working tree with the release version from
+`version.h`. It builds and tests a fresh source copy under `build/deb-build`,
+installs into a staging directory under `/usr`, then builds a `.deb` in
+`build/deb`. It never installs into the host system. The package includes shared
+and static libraries, headers, pkg-config metadata, `ivyprobe` and `ivyperf`.
+`dpkg-shlibdeps` determines runtime dependencies; `libpcre2-dev` and `pkgconf`
+are also required because this package includes development files. The package
+replaces the old `ivy-c`/`ivy-c-dev` packages.
+
+For a development package from the same local working tree:
+
+```sh
+make deb_git
+make deb_verify deb_package=build/deb/libivy_<version>.git<date>.<commit>_<arch>.deb
+```
+
+The development suffix belongs to the package version; the library version in
+`version.h` is unchanged. `deb_arch` defaults to `dpkg --print-architecture`.
+`deb_make_jobs`, `deb_build_dir`, `deb_package`, `deb_git_build_dir` and
+`deb_git_package` can be overridden. Install `lintian` to enable its checks in
+`deb_verify`. Relative path overrides are resolved from the repository root, including when
+invoking make from `src`.
+
+## MSYS2 / pacman packages
+
+Use an MSYS2 MinGW64 shell with `makepkg`, `make`, Git and the MinGW64 GCC,
+PCRE2 and pkgconf packages installed. All installed files use `/mingw64`:
+`bin/libivy.dll`, `lib/libivy.dll.a`, `lib/libivy.a`, headers, pkg-config metadata
+and the `.exe` tools. No files are installed under MSYS2's `/usr` prefix.
+
+For a release archive:
+
+```sh
+make pkg pkg_source_sha256=<sha256-of-the-release-archive>
+make pkg_verify
+pacman -U build/libivy-*.pkg.tar.*
+```
+
+With no checksum, `make pkg` generates the PKGBUILD and explains how to run
+`makepkg -g`; archive checksums are never skipped. For a development branch:
+
+```sh
+make pkg_git
+make pkg_verify pkg_package_glob='build/libivy-*.git-*.pkg.tar.*'
+```
+
+`pkg_git_branch` defaults to `master`; `pkg_git_source` and `pkg_git_source_dir`
+can also be overridden. Release builds accept `pkg_source`, `pkg_source_dir`
+and `pkg_source_sha256`, including a local source archive for validation before
+publishing a release. The selected source must contain this packaging system;
+older published archives are not patched for compatibility. Git builds use the
+latest pushed branch, not uncommitted local changes.
+
+Both variants use fresh build trees, run the non-network tests via `make check`,
+and preserve the static library with makepkg's `staticlibs` option. PKGBUILDs
+and source/build files are kept in `build/pkg-build` or `build/pkg-build-git`;
+resulting packages are written to `build/`. `pkg_prefix` defaults to `/mingw64`,
+and `pkg_make_jobs` controls parallelism.
+
+`make clean_packages` removes generated Debian/pacman packages and their build
+directories; ordinary `make clean` keeps package outputs.
+
+For portable recipe checks, run `make check-packaging` (Python 3 required). These
+use fixture compiler/package tools to verify staging, mandatory release checksums,
+Git source selection and Debian dependency generation/failure handling. They do
+not produce installable packages or replace native Linux/MSYS2 validation.

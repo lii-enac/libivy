@@ -18,6 +18,9 @@
 
 include Makefile.version
 
+PREFIX ?= /mingw64
+EXTRALIB = -lws2_32
+
 #RM=del
 RM=rm -f
 XTINC = 
@@ -72,10 +75,9 @@ static-libs: libivy.a
 #static-libs: libivy.a libgivy.a libtclivy.a  
 # not yiet libxtivy.a libgtkivy.a  need Modified Glut libglutivy.a
 
-shared-libs: libivy.so.$(MAJOR).$(MINOR) 
-# libgivy.so.$(MAJOR).$(MINOR)
-#shared-libs: libivy.so.$(MAJOR).$(MINOR) libgivy.so.$(MAJOR).$(MINOR)  libtclivy.so.$(MAJOR).$(MINOR)
-# not yiet libxtivy.so.$(MAJOR).$(MINOR) libgtkivy.so.$(MAJOR).$(MINOR) need Modified Glut libglutivy.so.$(MAJOR).$(MINOR)
+# Native Windows DLL plus its import library; static libivy.a remains available.
+shared-libs: libivy.dll libivy.dll.a
+
 
 ivytcl.o: ivytcl.c
 	$(CC) -DGNU_REGEXP -c $(CFLAGS) $(TCLINCL) -o ivytcl.o ivytcl.c
@@ -134,8 +136,11 @@ libtclivy.a: $(TCLOBJ)
 	$(RM) $@
 	ar cq $@ $(TCLOBJ)
 
-libivy.so.$(MAJOR).$(MINOR): $(OBJ)
-	$(CC) -shared -Wl,-soname,libivy.so.$(MAJOR) -o $@ $(OBJ)  -lws2_32 $(PCRELIB) 
+libivy.dll: $(OBJ)
+	$(CC) $(LDFLAGS) -shared -o $@ $(OBJ) -Wl,--out-implib,libivy.dll.a -lws2_32 $(PCRELIB)
+
+libivy.dll.a: libivy.dll
+	@test -f $@ || $(MAKE) -B -f Makefile.mingw libivy.dll
 
 libgivy.so.$(MAJOR).$(MINOR): $(GOBJ)
 	$(CC) -shared -Wl,-soname,libgivy.so.$(MAJOR) -o $@ $(GOBJ) -lws2_32 $(PCRELIB) 
@@ -157,102 +162,40 @@ libtclivy.so.$(MAJOR).$(MINOR): $(TCLOBJ)
 	$(TCLOBJ) $(TCLLIB) -lws2_32 $(PCRELIB) 
 
 clean:
-	-$(RM)  *.o *.a *.so *.so.* *~
+	-$(RM)  *.o *.a *.so *.so.* *.dll *.pc *~
 	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw clean)
 
 installlibs: static-libs shared-libs
-	test -d $(DESTDIR)$(PREFIX)/lib || mkdir -p $(DESTDIR)$(PREFIX)/lib
-#	test -d $(PREFIX)/usr/X11R6/lib || mkdir -p $(PREFIX)/usr/X11R6/lib
-	test -d $(DESTDIR)$(PREFIX)/include || mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
-	install -m644 libivy.a $(DESTDIR)$(PREFIX)/lib
-#	install -m644 libgivy.a $(PREFIX)/usr/lib
-#	install -m644 libxtivy.a $(PREFIX)/usr/X11R6/lib
-#	install -m644 libtclivy.a $(PREFIX)/usr/lib
-#	install -m644 libgtkivy.a $(PREFIX)/usr/X11R6/lib
+	mkdir -p $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/bin
+	install -m644 libivy.a libivy.dll.a $(DESTDIR)$(PREFIX)/lib/
+	install -m755 libivy.dll $(DESTDIR)$(PREFIX)/bin/
 
-# 	install -m644 libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib
-	install -m644 libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so
+includes:
+	mkdir -p $(DESTDIR)$(PREFIX)/include/Ivy
+	install -m644 ivy.h ivybind.h ivybuffer.h ivychannel.h ivydebug.h ivyloop.h ivysocket.h list.h timer.h version.h $(DESTDIR)$(PREFIX)/include/Ivy/
 
-#	install -m644 libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
-#	install -m644 libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
-#	install -m644 libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib
-#	install -m644 libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib
-
-	install -m644 *.h  $(DESTDIR)$(PREFIX)/include/Ivy
-
+# Compatibility target: DLL/import-library builds need no Unix shared-library links.
 installliblinks: installlibs
-#	ln -s /usr/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libtclivy.so
-	ln -fs $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so
-	ln -fs $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR).$(MINOR) $(DESTDIR)$(PREFIX)/lib/libivy.so.$(MAJOR)
-#	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so
-#	ln -s /usr/lib/libgivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/lib/libgivy.so.$(MAJOR)
-#	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so
-#	ln -s /usr/X11R6/lib/libxtivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libxtivy.so.$(MAJOR)
-#	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so
-#	ln -s /usr/X11R6/lib/libgtkivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libgtkivy.so.$(MAJOR)
-#	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so
-#	ln -s /usr/X11R6/lib/libtclivy.so.$(MAJOR).$(MINOR) $(PREFIX)/usr/X11R6/lib/libtclivy.so.$(MAJOR)
 
+installbins: tools
+	$(MAKE) -C $(TOOLS_DIR) -f Makefile.mingw install
 
-installbins: 
-	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw install)
+install: installlibs installbins includes installpkgconf
 
-installdocs:
-	test -d $(PREFIX)/usr/doc/ivy-c || mkdir -p $(PREFIX)/usr/doc/ivy-c
-	for f in `find  ../doc/*.html -type f -maxdepth 1`; do \
-                install -m 644 $$f $(PREFIX)/usr/doc/ivy-c; \
-        done
-	test -d $(PREFIX)/usr/man/man1 || mkdir -p $(PREFIX)/usr/man/man1
-	for f in `find  ../doc/*.1 -type f -maxdepth 1`; do \
-                install -m 644 $$f $(PREFIX)/usr/man/man1; \
-        done
-
-install: installlibs installbins installliblinks installdocs
-
-tools: static-libs
-	@(cd $(TOOLS_DIR) && $(MAKE) -f Makefile.mingw)
+tools: static-libs shared-libs
+	$(MAKE) -C $(TOOLS_DIR) -f Makefile.mingw
 
 rpm::
 	/usr/bin/rpmize
 
 pkgconf:
 	for f in ivy-c.pc.in ; do \
-		sed -e 's,/lib64,/lib,; s,@PREFIX@,"/usr",; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf
 	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig
-
-#----------------------------------------
-# package builder
-
-#pkg
-
-#note: 
-#      	makepkg
-# install with:
-#		pacman -U libivy.pkg 
-# remove with:
-#		pacman -Rs libivy
-pkg_destdir_version = build/pkg/libivy_$(MAJOR).$(MINOR).$(MINOR2)
-ifeq ($(PREFIX),)
-pkg_prefix = /usr
-else
-pkg_prefix = $(PREFIX)
-endif
-ifeq ($(DESTDIR),) 
-pkg_destdir= $(shell pwd)/$(pkg_destdir_version)
-else
-pkg_destdir = $(DESTDIR)
-endif
-pkg:
-#   for test only	
-#	make -f Makefile.mingw DESTDIR=$(pkg_destdir) PREFIX=$(pkg_prefix) installlibs  installpkgconf  #installliblinks
-	test -d build || mkdir -p build
-	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),' distrib/PKGBUILD.proto > build/PKGBUILD
-	cd build ; makepkg --skipinteg 
-.PHONY: pkg
 
 #https://www.msys2.org/
 #pkgdeps := git make pkg-config
@@ -269,8 +212,7 @@ install-pkgdeps:
 upgrade-pkgdeps:
 	$(pkgupg) $(pkgdeps)
 
-clear:
-	rm -rf build
+clear: clean_packages
 
 
 include Makefile.targets

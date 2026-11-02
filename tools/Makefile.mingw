@@ -10,54 +10,33 @@
 # 		Stéphane Chatty <chatty@cena.fr>
 #
 #	$Id: Makefile.mingw 3061 2007-02-13 08:35:08Z fourdan $
-# 
+#
 #	Please refer to file version.h for the
 #	copyright notice regarding this software
 #
 
+# MSYS2 / MinGW64 command-line tools.
+CC ?= gcc
+PREFIX ?= /mingw64
+PCRELIB = $(shell pkg-config --libs libpcre2-8)
+EXTRAINC = -I../src
+TARGETS = ivyprobe.exe ivyperf.exe
 
-#RM=del
-RM=rm -f
-XTINC = 
-XTLIB =  
-GTKINC = `gtk-config --cflags`
-GTKLIB = `gtk-config --libs`
-GLUTINC = -I/usr/include -I.
-GLUTLIB = -L.
-TCLINCL	= -I/usr/include/tcl8.4
-TCLLIB = -ltcl84
-
-EXTRALIB= -L../src -lws2_32 
-EXTRAINC=-I../src
-
-
-CC=gcc
-#CFLAGS = -g 
-# IVY full debug
-CFLAGS = -g  -DDEBUG
-TARGETS = ivyprobe 
-# not yiet ivygtkprobe ivyxtprobe  need Modified Glut ivyglutprobe
-
-.c.o:
-	$(CC) $(CFLAGS)  $(PCREINC) $(EXTRAINC) -c $*.c
-
+.PHONY: all install installbins clean
 all: $(TARGETS)
 
-ivyprobe: ivyprobe.o ../src/libivy.a
-	$(CC)  $(CFLAGS) $(EXTRAINC) -o $@ ivyprobe.o -L. -livy $(PCRELIB) $(EXTRALIB) 
+%.o: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(EXTRAINC) -c $< -o $@
+
+%.exe: %.o ../src/libivy.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -L../src -livy $(PCRELIB) -lws2_32
+
+install: installbins
+installbins: $(TARGETS)
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install -m755 $(TARGETS) $(DESTDIR)$(PREFIX)/bin/
 
 clean:
-	-$(RM) $(TARGETS) *.o *.a *.so *.so.* *~
+	rm -f $(TARGETS) *.o
 
-install: installbins 
-
-installbins: commands
-	test -d $(PREFIX)/usr/bin || mkdir -p $(PREFIX)/usr/bin
-	test -d $(PREFIX)/usr/X11R6/bin || mkdir -p $(PREFIX)/usr/X11R6/bin
-	install -m755 ivyprobe $(PREFIX)/usr/bin
-#	install -m755 ivyglutprobe $(PREFIX)/usr/X11R6/bin
-
-
-
-# Refresh the version displayed by tools after version.h changes.
-ivyprobe.o ivythroughput.o ivyperf.o: ../src/version.h
+ivyprobe.o ivyperf.o: ../src/version.h

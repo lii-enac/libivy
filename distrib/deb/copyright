@@ -1,0 +1,14 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: libivy
+Source: https://github.com/lii-enac/libivy
+
+Files: *
+Copyright: 1997-2026 Centre d'études de la Navigation Aérienne, ENAC and contributors
+License: LGPL-2+
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option) any
+ later version.
+ .
+ On Debian systems, the complete license text is available in
+ /usr/share/common-licenses/LGPL-2.

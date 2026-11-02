@@ -1,4 +1,4 @@
-TARGETS = ivyprobe #ivythroughput ivytestready ivyperf ivyglibprobe ivyxtprobe #ivyprobe_efence 
+TARGETS = ivyprobe ivyperf
 OMP_TARGET= ivyprobe_omp ivythroughput_omp 
 
 PCRELIB = `pkg-config --libs libpcre2-8`
@@ -62,7 +62,7 @@ ivyglutprobe: ivyglutprobe.o ../src/libglutivy.a
 
 installbins: $(TARGETS)
 	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin
-	install -m755 ivyprobe $(DESTDIR)$(PREFIX)/bin
+	install -m755 $(TARGETS) $(DESTDIR)$(PREFIX)/bin
 
 installbins_omp:  $(OMP_TARGET)
 	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin

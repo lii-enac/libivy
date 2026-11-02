@@ -1,0 +1,5 @@
+libivy (@VERSION@) unstable; urgency=medium
+
+  * Build the PCRE2-based Ivy library, development files and tools.
+
+ -- Mathieu Poirier <mathieu.poirier@enac.fr>  @DATE@

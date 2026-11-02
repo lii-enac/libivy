@@ -1,0 +1,30 @@
+# Maintainer: Mathieu Poirier <mathieu.poirier@enac.fr>
+pkgname=libivy
+pkgver=@PKG_VERSION@
+pkgrel=1
+pkgdesc="Ivy software bus libraries, development files and tools"
+arch=('x86_64')
+url="https://github.com/lii-enac/libivy"
+license=('LGPL-2.0-or-later')
+depends=('mingw-w64-x86_64-pcre2' 'mingw-w64-x86_64-pkgconf')
+makedepends=('make' 'mingw-w64-x86_64-gcc' @VCS_DEPENDENCY@)
+options=('staticlibs')
+source=("@PKG_SOURCE@")
+sha256sums=('@PKG_SOURCE_SHA256@')
+
+build() {
+    cd "$srcdir/@PKG_SOURCE_DIR@"
+    make -j@PKG_MAKE_JOBS@ PREFIX="@PKG_PREFIX@"
+}
+
+check() {
+    cd "$srcdir/@PKG_SOURCE_DIR@"
+    make check
+}
+
+package() {
+    cd "$srcdir/@PKG_SOURCE_DIR@"
+    make -j@PKG_MAKE_JOBS@ PREFIX="@PKG_PREFIX@" DESTDIR="$pkgdir" install
+    install -Dm644 src/version.h "$pkgdir/@PKG_PREFIX@/share/licenses/$pkgname/LICENSE"
+    install -Dm644 README.md "$pkgdir/@PKG_PREFIX@/share/doc/$pkgname/README.md"
+}

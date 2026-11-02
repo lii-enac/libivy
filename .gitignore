@@ -11,3 +11,5 @@ tools/ivythroughput
 tests/build*/
 *.diff
 
+
+/build/

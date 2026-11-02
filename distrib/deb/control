@@ -1,0 +1,14 @@
+Package: libivy
+Version: @VERSION@
+Section: libdevel
+Priority: optional
+Architecture: @ARCH@
+Homepage: https://github.com/lii-enac/libivy
+Depends: pkgconf, libpcre2-dev, @SHLIBS_DEPENDS@
+Conflicts: ivy-c, ivy-c-dev
+Replaces: ivy-c, ivy-c-dev
+Provides: ivy-c (= @VERSION@), ivy-c-dev (= @VERSION@)
+Maintainer: Mathieu Poirier <mathieu.poirier@enac.fr>
+Description: Ivy software bus libraries, development files and tools
+ Headers, static and shared libraries, pkg-config metadata and command-line
+ tools for the Ivy software bus, using the PCRE2 regular expression engine.
