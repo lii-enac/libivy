@@ -8,9 +8,10 @@ BUILD_DIR ?= build
 REGEX_FLAGS = -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 
 .PHONY: check sanitize clean
-check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery
+check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery $(BUILD_DIR)/receive
 	./$(BUILD_DIR)/regex
 	./$(BUILD_DIR)/discovery
+	./$(BUILD_DIR)/receive
 
 $(BUILD_DIR)/regex: regex.c $(IVYBIND) ../src/ivybind.h
 	mkdir -p $(BUILD_DIR)
@@ -44,3 +45,15 @@ check-caseless:
 $(BUILD_DIR)/discovery: discovery.c ../src/ivydiscovery.h
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -I../src discovery.c -o $@ $(LDFLAGS)
+
+# receive.c includes ivy.c so its private protocol receiver is instrumented too.
+RECEIVE_SOURCES = $(addprefix ../src/,ivyloop.c timer.c ivysocket.c ivybuffer.c ivyfifo.c ivybind.c intervalRegexp.c param.c)
+ifeq ($(OS),Windows_NT)
+RECEIVE_CPPFLAGS = -DWIN32
+RECEIVE_LIBS = -lws2_32
+endif
+$(BUILD_DIR)/receive: receive.c ../src/ivy.c ../src/ivydiscovery.h $(RECEIVE_SOURCES) $(wildcard ../src/*.h)
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(RECEIVE_CPPFLAGS) $(CFLAGS) $(REGEX_FLAGS) -I../src \
+		$(shell $(PKG_CONFIG) --cflags $(PCRE_PKG)) receive.c $(RECEIVE_SOURCES) \
+		-o $@ $(LDFLAGS) $(shell $(PKG_CONFIG) --libs $(PCRE_PKG)) $(RECEIVE_LIBS)

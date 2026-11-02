@@ -93,3 +93,9 @@ unusual constructs should test their own regex corpus; see the
 Release packaging and the Homebrew formula still need a coordinated update to
 PCRE2 before publishing this migration. In particular, the existing Homebrew
 formula fetches the old 3.15.8 release and depends on `pcre`.
+
+Protocol reception accepts at most `MAX_MATCHING_ARGS` arguments (currently 120)
+per message. Messages exceeding that limit are rejected in full, without calling
+the application callback; the connection remains usable. `make check` and
+`make sanitize` test this limit, empty arguments and reception after rejection,
+without opening network sockets.

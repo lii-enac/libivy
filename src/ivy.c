@@ -706,6 +706,11 @@ static void Receive( Client client, const void *data, char *line )
 					arg = nextArg( arg, ARG_END);	
 					while ( arg )
 						{
+						if (argc >= MAX_MATCHING_ARGS) {
+							fprintf(stderr, "Ignoring message id=%d: more than %d arguments\n",
+							        id, MAX_MATCHING_ARGS);
+							return; /* Reject the whole message; never call back with truncated data. */
+						}
 						argv[argc++] = arg;
 						arg = nextArg( 0, ARG_END );
 						}
