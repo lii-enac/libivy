@@ -45,8 +45,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\pcre-7.9"
-				PreprocessorDefinitions="_DEBUG;DEBUG;WIN32;_LIB;REGEX_MALLOC;USE_PCRE_REGEX;PCRE_OPT=PCRE_CASELESS;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="$(PCRE2_ROOT)\include"
+				PreprocessorDefinitions="_DEBUG;DEBUG;WIN32;_LIB;REGEX_MALLOC;USE_PCRE_REGEX;PCRE_OPT=PCRE2_CASELESS;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				PrecompiledHeaderFile=".\Debug/ivy_c.pch"
@@ -70,8 +70,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib"
-				AdditionalLibraryDirectories=""
+				AdditionalDependencies="wsock32.lib pcre2-8.lib"
+				AdditionalLibraryDirectories="$(PCRE2_ROOT)\lib"
 				IgnoreAllDefaultLibraries="false"
 				ModuleDefinitionFile="libIvy.def"
 				RandomizedBaseAddress="1"
@@ -126,8 +126,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\pcre-7.9"
-				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;REGEX_MALLOC;USE_PCRE_REGEX;PCRE_OPT=PCRE_CASELESS;_CRT_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="$(PCRE2_ROOT)\include"
+				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;REGEX_MALLOC;USE_PCRE_REGEX;PCRE_OPT=PCRE2_CASELESS;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -149,8 +149,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib"
-				AdditionalLibraryDirectories=""
+				AdditionalDependencies="wsock32.lib pcre2-8.lib"
+				AdditionalLibraryDirectories="$(PCRE2_ROOT)\lib"
 				ModuleDefinitionFile="libIvy.def"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -181,10 +181,6 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		<ProjectReference
-			ReferencedProjectIdentifier="{D79FC143-498E-4342-B2C7-BDAD1B8D0E6B}"
-			RelativePathToProject="..\..\pcre\pcre.vcproj"
-		/>
 	</References>
 	<Files>
 		<Filter

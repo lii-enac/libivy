@@ -15,6 +15,15 @@
 #
 
 
+# Select the native backend for plain `make`, including clean and help.
+.DEFAULT_GOAL := all
+ivy_platform := $(shell uname -s)
+ifeq ($(ivy_platform),Darwin)
+include Makefile.osx
+else ifneq ($(filter MINGW% MSYS%,$(ivy_platform)),)
+include Makefile.mingw
+else
+
 # change this in version.h too !!!!
 MAJOR=3
 MINOR=15
@@ -66,18 +75,17 @@ TCLLIB = -ltcl$(TCLVERS)
 # use these if you want to use Aqua Tcl on macOSX
 #TCLINC = -I/Library/Frameworks/Tcl.framework/Headers
 #TCLLIB = -framework Tcl
-PCREINC = $(shell pcre-config --cflags)
-PCRELIB = $(shell pcre-config --libs)
-CASESENSITIVE = "yes"
-ifeq ($(CASESENSITIVE), "no")
-	PCRE_OPT=PCRE_CASELESS
+PCREINC = $(shell pkg-config --cflags libpcre2-8)
+PCRELIB = $(shell pkg-config --libs libpcre2-8)
+CASESENSITIVE ?= yes
+ifeq ($(subst ",,$(CASESENSITIVE)),no)
+	PCRE_OPT=PCRE2_CASELESS
 	REGCOMP_OPT=REG_ICASE
 else
 	PCRE_OPT=0
 	REGCOMP_OPT=REG_EXTENDED
 endif
 
-#PCREOBJ = `pcre-config --prefix`/lib/libpcre.a
 PCREOBJ =
 
 ifeq ($(shell uname -s),SunOS)
@@ -113,7 +121,7 @@ endif
 
 
 
-BUGGY_DEBIAN_OPTION = -DPCRECPP_EXP_DEFN="" -DPCRECPP_EXP_DECL=""
+
 OMPCFLAGS = $(CFLAGS) -fopenmp -DOPENMP=1 -D_REENTRANT
 OMPLIB = -lgomp -lpthread
 
@@ -140,7 +148,7 @@ STATICTARGETLIBS=libivy.a #libgivy.a libxtivy.a libtclivy.a
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
 .cpp.o:
-	$(CPP) $(CFLAGS) $(BUGGY_DEBIAN_OPTION) -c $*.cpp
+	$(CPP) $(CFLAGS) -c $*.cpp
 
 all: static-libs shared-libs pkgconf tools 
 libomp: libivy_omp.a libivy_omp.so.$(MAJOR).$(MINOR)
@@ -373,3 +381,6 @@ deb:
 # check integrity of the build package. We still have error
 #	cd "build/deb" ; lintian djnn-cpp_$(MAJOR).$(MINOR).$(MINOR2).deb
 .PHONY: deb
+
+include Makefile.targets
+endif

@@ -28,11 +28,11 @@ ifndef PREFIX
 	PREFIX=/opt/local
 endif
 
-PCREINC = $(shell pcre-config --cflags)
-PCRELIB = $(shell pcre-config --libs)
-CASESENSITIVE = "yes"
-ifeq ($(CASESENSITIVE), "no")
-	PCRE_OPT=PCRE_CASELESS
+PCREINC = $(shell pkg-config --cflags libpcre2-8)
+PCRELIB = $(shell pkg-config --libs libpcre2-8)
+CASESENSITIVE ?= yes
+ifeq ($(subst ",,$(CASESENSITIVE)),no)
+	PCRE_OPT=PCRE2_CASELESS
 	REGCOMP_OPT=REG_ICASE
 else
 	PCRE_OPT=0
@@ -109,20 +109,20 @@ libivy_omp.a: $(OMPOBJ)
 	$(LIBTOOL) $@ $(OMPOBJ)
 
 libivy.dylib: $(OBJ)
-	$(CC) $(CFLAGS) -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libivy.dylib -o $@ $(OBJ) $(PCRELIB)
-	#$(CC) $(CFLAGS) -dynamiclib  -o $@ $(OBJ) $(PCRELIB)
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libivy.dylib -o $@ $(OBJ) $(PCRELIB)
+	#$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib  -o $@ $(OBJ) $(PCRELIB)
 
 libivy_omp.dylib: $(OMPOBJ)
-	$(OMPCC) -dynamiclib -install_name $(DESTDIR)$(PREFIX)$(LIB)/lib/libivy_omp.dylib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
-	#$(OMPCC) -dynamiclib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
+	$(OMPCC) $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib -install_name $(DESTDIR)$(PREFIX)$(LIB)/lib/libivy_omp.dylib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
+	#$(OMPCC) $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib -o $@ $(OMPOBJ) $(PCRELIB) $(OMPLIB)
 
 libglibivy.a: $(GLIBOBJ)
 	rm -f $@
 	$(LIBTOOL) $@ $(GLIBOBJ)
 
 libglibivy.dylib: $(GLIBOBJ)
-	$(CC) $(CFLAGS)  -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libglibivy.dylib  -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
-	#$(CC) $(CFLAGS)  -dynamiclib -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
+	$(CC) $(CFLAGS)  $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib -install_name $(DESTDIR)$(PREFIX)/lib/libglibivy.dylib  -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
+	#$(CC) $(CFLAGS)  $(LDFLAGS) -Wl,-headerpad_max_install_names -dynamiclib -o $@ $(GLIBOBJ) $(PCRELIB) $(GLIBLIB)
 
 
 
@@ -180,3 +180,5 @@ pkgconf:
 installpkgconf: pkgconf
 	test -d $(DESTDIR)$(PREFIX)/lib/pkgconfig || mkdir -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	install -m 644 *.pc	$(DESTDIR)$(PREFIX)/lib/pkgconfig
+
+include Makefile.targets

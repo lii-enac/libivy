@@ -31,14 +31,14 @@ GLUTINC = -I/usr/include -I.
 GLUTLIB = -L.
 TCLINCL	= -I/usr/include/tcl8.4
 TCLLIB = -ltcl84
-PCREINC = $(shell pcre-config --cflags)
-PCRELIB = $(shell pcre-config --libs)
+PCREINC = $(shell pkg-config --cflags libpcre2-8)
+PCRELIB = $(shell pkg-config --libs libpcre2-8)
 #PCREINSTALLDIR = c:\temp\GnuWin32
 #PCREINC = -I$(PCREINSTALLDIR)\include
-#PCRELIB = -L$(PCREINSTALLDIR)\lib -lpcre
-CASESENSITIVE = "yes"
-ifeq ($(CASESENSITIVE), "no")
-	PCRE_OPT=PCRE_CASELESS
+#PCRELIB = -L$(PCREINSTALLDIR)\lib -lpcre2-8
+CASESENSITIVE ?= yes
+ifeq ($(subst ",,$(CASESENSITIVE)),no)
+	PCRE_OPT=PCRE2_CASELESS
 	REGCOMP_OPT=REG_ICASE
 else
 	PCRE_OPT=0
@@ -262,7 +262,7 @@ pkg:
 pkgcmd := pacman -S --needed
 pkgupg := pacman -Syu --needed
 
-mgwpkgdeps += pcre gcc
+mgwpkgdeps += pcre2 gcc
 mgwpkgdeps := $(addprefix mingw-w64-x86_64-, $(mgwpkgdeps))
 pkgdeps += $(mgwpkgdeps)
 
@@ -275,3 +275,5 @@ upgrade-pkgdeps:
 clear:
 	rm -rf build
 
+
+include Makefile.targets

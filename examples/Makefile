@@ -4,7 +4,7 @@
 TARGETS = motifButtonIvy gtkIvyButton testUnbind
    SRCS = motifButtonIvy.c gtkIvyButton.c testUnbind.c
    OBJS = $(SRCS:.c=.o)
-PCRELIB = `pcre-config --libs`
+PCRELIB = `pkg-config --libs libpcre2-8`
 EXTRALIB= -L../src
 EXTRAINC=-I../src
 GTKLIB  = `pkg-config gtk+-x11-2.0 --libs`
@@ -30,7 +30,7 @@ motifButtonIvy.o: motifButtonIvy.c
 	$(CC) -c $< $(MOTIFINC) $(EXTRALIB)
 
 motifButtonIvy: motifButtonIvy.o
-	$(CC) -o $@ $< $(MOTIFLIB) -lxtivy -lpcre $(EXTRALIB)
+	$(CC) -o $@ $< $(MOTIFLIB) -lxtivy $(PCRELIB) $(EXTRALIB)
 
 clean:
 	rm -fR $(OBJS) $(TARGETS) *~

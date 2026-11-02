@@ -8,8 +8,8 @@ CPP='g++'
 #CC = $(OMPCC)
 #CPP= $(OMPCPP)
 
-PCRELIB = `pcre-config --libs`
-PCREINCL = `pcre-config --cflags`
+PCRELIB = `pkg-config --libs libpcre2-8`
+PCREINCL = `pkg-config --cflags libpcre2-8`
 EXTRALIB= -L../src 
 EXTRAINC=-I../src
 
@@ -28,10 +28,10 @@ ivyprobe: ivyprobe.o ../src/libivy.a
 	$(CC)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyprobe.o -L../src -livy $(PCRELIB) $(EXTRALIB) 
 
 ivythroughput: ivythroughput.o ../src/libivy.a
-	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivythroughput.o -L../src -livy -lpcrecpp $(PCRELIB) $(EXTRALIB) 
+	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivythroughput.o -L../src -livy $(PCRELIB) $(EXTRALIB)
 
 ivyprobe_efence: ivyprobe.o ../src/libivy.a
-	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyprobe.o -L../src -livy -lpcrecpp $(PCRELIB) $(EXTRALIB) -lefence
+	$(CPP)  $(CFLAGS) $(FPIC) $(EXTRAINC) -o $@ ivyprobe.o -L../src -livy $(PCRELIB) $(EXTRALIB) -lefence
 
 
 
@@ -39,7 +39,7 @@ ivyprobe_omp: ivyprobe.o ../src/libivy_omp.a
 	$(OMPCC)  $(CFLAGS) $(FPIC) $(EXTRAINC) $(PCREINCL) -o $@ ivyprobe.o -L../src -livy_omp $(PCRELIB) $(EXTRALIB) $(OMPLIB) -lgcc_s.1
 
 ivythroughput_omp: ivythroughput.o ../src/libivy_omp.a
-	$(OMPCPP)  $(CFLAGS) $(FPIC)$(EXTRAINC) $(PCREINCL) -o $@ ivythroughput.o -L../src -livy_omp -lpcrecpp $(PCRELIB) $(EXTRALIB) $(OMPLIB) -lgcc_s.1
+	$(OMPCPP)  $(CFLAGS) $(FPIC)$(EXTRAINC) $(PCREINCL) -o $@ ivythroughput.o -L../src -livy_omp $(PCRELIB) $(EXTRALIB) $(OMPLIB) -lgcc_s.1
 
 ivyprobe.o : ivyprobe.c 
 	$(CC)  $(CFLAGS) $(FPIC) $(EXTRAINC) $(REGEXP) -c ivyprobe.c -o $@

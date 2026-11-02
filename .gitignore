@@ -6,3 +6,4 @@ src/libivy.pc
 tools/*.o
 tools/ivyprobe
 
+tests/build*/

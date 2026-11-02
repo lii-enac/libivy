@@ -1,0 +1,36 @@
+# Shared targets for the Linux, macOS and MinGW backends.
+.PHONY: all static-libs shared-libs tools pkgconf install clean help clean-tests
+
+help:
+	@echo "Available targets:"
+	@echo "  make                  build libivy using the native platform backend"
+	@echo "  make static-libs      build the static library"
+	@echo "  make shared-libs      build the shared library"
+	@echo "  make tools            build the command-line tools"
+	@echo "  make pkgconf          generate pkg-config metadata"
+	@echo "  make install PREFIX=/path   install libraries, headers and tools"
+	@echo ""
+	@echo "Cleaning:"
+	@echo "  make clean            remove generated libraries, objects, tools and test builds"
+	@echo ""
+	@echo "Tests:"
+	@echo "  make check"
+	@echo "  make check-caseless"
+	@echo "  make sanitize"
+	@echo "  make check-bus   requires a built library and sockets"
+	@echo ""
+	@echo "Tip: clean before switching architecture or regex build options."
+
+clean: clean-tests
+
+clean-tests:
+	$(MAKE) -C ../tests clean
+
+.PHONY: test check check-caseless sanitize check-bus
+test: check
+
+check check-caseless sanitize:
+	$(MAKE) -C ../tests $@
+
+check-bus: static-libs
+	$(MAKE) -C ../tests $@
