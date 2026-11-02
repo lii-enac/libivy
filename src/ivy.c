@@ -59,6 +59,7 @@ extern int WSAAPI inet_pton(int af, const char *src, void *dst);
 #include "ivybuffer.h"
 #include "ivydebug.h"
 #include "ivybind.h"
+#include "ivydiscovery.h"
 #include "ivy.h"
 
 #define ARG_START "\002"
@@ -878,21 +879,18 @@ static void *ClientCreate( Client client )
 static void BroadcastReceive( Client client, const void *data, char *line )
 {	
 	Client app=NULL;
-	int err;
 	int version;
 	unsigned short serviceport;
 	char appid[128];
 	char appname[2048];
-	unsigned short remoteport;
-	const char *remotehost = 0;
+	unsigned short remoteport = 0;
+	const char *remotehost = "unknown";
 
-	memset( appid, 0, sizeof( appid ) );
-	memset( appname, 0, sizeof( appname ) );
-	err = sscanf (line,"%d %hu %s %[^\n]", &version, &serviceport, appid, appname);
-	if ( err < 2 ) {
+	if (!IvyParseDiscovery(line, &version, &serviceport,
+	                       appid, sizeof(appid), appname, sizeof(appname))) {
 		/* ignore the message */
 		SocketGetRemoteHost (client, &remotehost, &remoteport );
-		printf (" Bad supervision message, expected 'version port' from %s:%d\n",
+		printf (" Bad supervision message, expected 'version port appid appname' from %s:%d\n",
 				remotehost, remoteport);
 		return;
 	}

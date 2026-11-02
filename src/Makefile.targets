@@ -34,3 +34,6 @@ check check-caseless sanitize:
 
 check-bus: static-libs
 	$(MAKE) -C ../tests $@
+
+# Recompile the receiver when its internal parser changes.
+ivy.o: ivydiscovery.h

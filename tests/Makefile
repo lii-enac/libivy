@@ -8,8 +8,9 @@ BUILD_DIR ?= build
 REGEX_FLAGS = -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 
 .PHONY: check sanitize clean
-check: $(BUILD_DIR)/regex
+check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery
 	./$(BUILD_DIR)/regex
+	./$(BUILD_DIR)/discovery
 
 $(BUILD_DIR)/regex: regex.c $(IVYBIND) ../src/ivybind.h
 	mkdir -p $(BUILD_DIR)
@@ -39,3 +40,7 @@ $(BUILD_DIR)/bus: bus.c $(IVY_LIB)
 .PHONY: check-caseless
 check-caseless:
 	$(MAKE) check BUILD_DIR=build-caseless PCRE_OPT=PCRE2_CASELESS CPPFLAGS=-DTEST_CASELESS
+
+$(BUILD_DIR)/discovery: discovery.c ../src/ivydiscovery.h
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -I../src discovery.c -o $@ $(LDFLAGS)
