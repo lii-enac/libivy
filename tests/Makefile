@@ -8,11 +8,12 @@ BUILD_DIR ?= build
 REGEX_FLAGS = -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 
 .PHONY: check sanitize clean
-check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery $(BUILD_DIR)/receive $(BUILD_DIR)/fifo
+check: $(BUILD_DIR)/regex $(BUILD_DIR)/discovery $(BUILD_DIR)/receive $(BUILD_DIR)/fifo $(BUILD_DIR)/socket_cleanup
 	./$(BUILD_DIR)/regex
 	./$(BUILD_DIR)/discovery
 	./$(BUILD_DIR)/receive
 	./$(BUILD_DIR)/fifo
+	./$(BUILD_DIR)/socket_cleanup
 
 $(BUILD_DIR)/regex: regex.c $(IVYBIND) ../src/ivybind.h
 	mkdir -p $(BUILD_DIR)
@@ -64,3 +65,8 @@ $(BUILD_DIR)/fifo: fifo.c ../src/ivyfifo.c ../src/ivysocket.c ../src/ivyloop.c $
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(RECEIVE_CPPFLAGS) $(CFLAGS) -I../src fifo.c $(FIFO_SUPPORT) \
 		-o $@ $(LDFLAGS) $(RECEIVE_LIBS)
+
+$(BUILD_DIR)/socket_cleanup: socket_cleanup.c ../src/ivysocket.c ../src/ivyloop.c ../src/ivyfifo.c $(FIFO_SUPPORT) $(wildcard ../src/*.h)
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(RECEIVE_CPPFLAGS) $(CFLAGS) -I../src socket_cleanup.c \
+		../src/ivyfifo.c $(FIFO_SUPPORT) -o $@ $(LDFLAGS) $(RECEIVE_LIBS)

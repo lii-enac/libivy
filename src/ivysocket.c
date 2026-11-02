@@ -139,6 +139,7 @@ static void DeleteSocket(void *data)
 	  IvyFifoDelete (client->ifb);
 	  client->ifb = NULL;
 	}
+	free(client->buffer);
 	IVY_LIST_REMOVE (clients_list, client );
 }
 
