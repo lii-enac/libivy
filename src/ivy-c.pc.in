@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: libivy
 Description: A software bus
-Version: @MAJOR@.@MINOR@
+Version: @MAJOR@.@MINOR@.@MINOR2@
 Libs: -L${libdir} -livy
 Libs.private: @PCRELIB@ @EXTRALIB@
 Cflags: -I${includedir}

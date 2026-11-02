@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
       strcpy (bus, optarg);
       break;
     case 'v':
-      printf("ivy c library version %d.%d\n",IVYMAJOR_VERSION, IVYMINOR_VERSION);
+      printf("ivy c library version %d.%d.%d\n",IVYMAJOR_VERSION, IVYMINOR_VERSION, IVYPATCH_VERSION);
       break;
     case 'p':
       regexpAreUniq = true;
@@ -567,9 +567,9 @@ void sendAllMessageCB (TimerId id, void *user_data, unsigned long delta)
   }
   IvySendMsg ("endOfSequence");
 
-  printf ("[ivy %d.%d] envoyer [%d/%d] messages filtres par %d regexps a %d clients "
+  printf ("[ivy %d.%d.%d] envoyer [%d/%d] messages filtres par %d regexps a %d clients "
 	  "prends %.1f secondes\n",
-	  IVYMAJOR_VERSION, IVYMINOR_VERSION,
+	  IVYMAJOR_VERSION, IVYMINOR_VERSION, IVYPATCH_VERSION,
 	  envoyes, nbMess, nbReg, numClients,
 	  (currentTime()-startTime) / 1000.0) ;
   TimerRepeatAfter (1, 1000, sendAllMessageCB ,user_data);

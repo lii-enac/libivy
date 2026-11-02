@@ -16,10 +16,7 @@
 #
 
 
-# change this in version.h too !!!!
-MAJOR=3
-MINOR=15
-MINOR2=8
+include Makefile.version
 
 #RM=del
 RM=rm -f
@@ -220,7 +217,7 @@ rpm::
 
 pkgconf:
 	for f in ivy-c.pc.in ; do \
-		sed -e 's,/lib64,/lib,; s,@PREFIX@,"/usr",; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,"/usr",; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf
@@ -253,7 +250,7 @@ pkg:
 #   for test only	
 #	make -f Makefile.mingw DESTDIR=$(pkg_destdir) PREFIX=$(pkg_prefix) installlibs  installpkgconf  #installliblinks
 	test -d build || mkdir -p build
-	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),;	 s,@MINOR2@,$(MINOR2),' distrib/PKGBUILD.proto > build/PKGBUILD
+	sed -e 's,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),' distrib/PKGBUILD.proto > build/PKGBUILD
 	cd build ; makepkg --skipinteg 
 .PHONY: pkg
 

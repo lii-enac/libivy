@@ -15,9 +15,7 @@
 #
 
 
-# change this in version.h too !!!!
-MAJOR=3
-MINOR=11
+# The C sources obtain the version directly from version.h.
 
 # Set PCRE2_ROOT to an installed PCRE2 (headers + DLL/import library).
 !IFNDEF PCRE2_ROOT

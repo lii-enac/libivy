@@ -58,3 +58,6 @@ installbins: commands
 #	install -m755 ivyglutprobe $(PREFIX)/usr/X11R6/bin
 
 
+
+# Refresh the version displayed by tools after version.h changes.
+ivyprobe.o ivythroughput.o ivyperf.o: ../src/version.h

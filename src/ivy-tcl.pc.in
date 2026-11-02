@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: ivy-tcl
 Description: A software bus (TCL main loop)
-Version: @MAJOR@.@MINOR@
+Version: @MAJOR@.@MINOR@.@MINOR2@
 Libs: -L${libdir} -ltclivy
 Libs.private: @PCRELIB@ @EXTRALIB@
 Cflags: -I${includedir}

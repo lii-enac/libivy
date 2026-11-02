@@ -7,6 +7,7 @@ help:
 	@echo "  make static-libs      build the static library"
 	@echo "  make shared-libs      build the shared library"
 	@echo "  make tools            build the command-line tools"
+	@echo "  make version          print the release version from version.h"
 	@echo "  make pkgconf          generate pkg-config metadata"
 	@echo "  make install PREFIX=/path   install libraries, headers and tools"
 	@echo ""
@@ -37,3 +38,10 @@ check-bus: static-libs
 
 # Recompile the receiver when its internal parser changes.
 ivy.o: ivydiscovery.h
+
+.PHONY: version
+version:
+	@echo "$(VERSION)"
+
+# Rebuild version-dependent objects after a release version change.
+$(sort $(OBJ) $(OMPOBJ) $(GOBJ) $(XTOBJ) $(GLIBOBJ) $(GLUTOBJ) $(TCLOBJ)): version.h

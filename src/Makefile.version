@@ -1,0 +1,8 @@
+# version.h is the single source of the library release version.
+override MAJOR := $(shell awk '$$1 == "\#define" && $$2 == "IVYMAJOR_VERSION" { print $$3 }' version.h)
+override MINOR := $(shell awk '$$1 == "\#define" && $$2 == "IVYMINOR_VERSION" { print $$3 }' version.h)
+override MINOR2 := $(shell awk '$$1 == "\#define" && $$2 == "IVYPATCH_VERSION" { print $$3 }' version.h)
+ifneq ($(words $(MAJOR) $(MINOR) $(MINOR2)),3)
+$(error version.h must define IVYMAJOR_VERSION, IVYMINOR_VERSION and IVYPATCH_VERSION)
+endif
+override VERSION := $(MAJOR).$(MINOR).$(MINOR2)

@@ -27,3 +27,6 @@
  */
 #define IVYMAJOR_VERSION 3
 #define IVYMINOR_VERSION 16
+
+/* Release patch level; the build and package metadata read these definitions. */
+#define IVYPATCH_VERSION 0

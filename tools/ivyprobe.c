@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
 				strcpy(agentnamebuf, optarg);
 				agentname=agentnamebuf;
 			case 'v':
-				printf("ivy c library version %d.%d\n",IVYMAJOR_VERSION,IVYMINOR_VERSION);
+				printf("ivy c library version %d.%d.%d\n",IVYMAJOR_VERSION,IVYMINOR_VERSION,IVYPATCH_VERSION);
 				break;
 			case 't':
 			        timer_test = 1;

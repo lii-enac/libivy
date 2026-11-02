@@ -106,3 +106,13 @@ pending data) close the connection rather than reporting successful delivery.
 `IvyFifoSendSocket` returns the remaining byte count, or `IVY_FIFO_SEND_ERROR`
 on failure. Tests simulate congestion, interruptions, partial writes and ring
 buffer wrap without network sockets.
+
+## Release version
+
+Edit only `IVYMAJOR_VERSION`, `IVYMINOR_VERSION` and `IVYPATCH_VERSION` in
+`src/version.h` to change the library release version. Linux, macOS and MinGW
+Makefiles derive `MAJOR`, `MINOR`, `MINOR2` and `VERSION` from that header;
+the package templates and pkg-config files use the same full version.
+`make version` prints it from either the repository root or `src`.
+The shared-library filename and SONAME retain their existing major/minor format.
+The historical Debian changelog still tracks Debian package releases separately.

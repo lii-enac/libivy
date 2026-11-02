@@ -15,9 +15,7 @@
 #       copyright notice regarding this software
 #
 
-# change this in version.h too !!!!
-MAJOR=3
-MINOR=15
+include Makefile.version
 
 LIB=/lib
 
@@ -174,7 +172,7 @@ clean:
 
 pkgconf:
 	for f in ivy-c.pc.in ; do \
-		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
+		sed -e 's,/lib64,/lib,; s,@PREFIX@,$(PREFIX),; s,@MAJOR@,$(MAJOR),; s,@MINOR@,$(MINOR),; s,@MINOR2@,$(MINOR2),; s,@PCRELIB@,$(PCRELIB),; s,@EXTRALIB@,$(EXTRALIB),' $$f > libivy.pc ; \
 	done
 
 installpkgconf: pkgconf

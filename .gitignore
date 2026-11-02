@@ -6,6 +6,8 @@ src/*.dylib
 src/libivy.pc
 tools/*.o
 tools/ivyprobe
-
+tools/ivyperf
+tools/ivythroughput
 tests/build*/
 *.diff
+

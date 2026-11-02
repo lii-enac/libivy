@@ -74,3 +74,6 @@ install_omp: installbins_omp
 
 clean:
 	rm -fR $(TARGETS) $(OMP_TARGET) *~ *.o
+
+# Refresh the version displayed by tools after version.h changes.
+ivyprobe.o ivythroughput.o ivyperf.o: ../src/version.h
