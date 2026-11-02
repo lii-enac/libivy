@@ -2,10 +2,10 @@
  *	Ivy, C interface
  * 
  *	Copyright (C) 1997-2004
- *	Centre d'Études de la Navigation Aérienne
+ *	Centre d'Ã©tudes de la Navigation AÃ©rienne
  *
- *	Authors: François-Régis Colin <colin@cena.dgac.fr>
- *		Stéphane Chatty <chatty@cena.dgac.fr>
+ *	Authors: FranÃ§ois-RÃ©gis Colin <colin@cena.dgac.fr>
+ *		StÃ©phane Chatty <chatty@cena.dgac.fr>
  *		Yannick Jestin <jestin@cena.fr>
  *
  *	$Id: version.h 3626 2014-12-23 09:35:46Z bustico $
@@ -26,4 +26,4 @@
  *
  */
 #define IVYMAJOR_VERSION 3
-#define IVYMINOR_VERSION 15
+#define IVYMINOR_VERSION 16

@@ -26,8 +26,8 @@ else
 
 # change this in version.h too !!!!
 MAJOR=3
-MINOR=15
-MINOR2=9
+MINOR=16
+MINOR2=0
 
 LIB = /lib
 
