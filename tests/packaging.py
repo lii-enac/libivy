@@ -72,6 +72,21 @@ tar -czf "$PKGDEST/$pkgname-$pkgver-1-x86_64.pkg.tar.gz" -C "$PKGDEST/fixture" m
     run(["bash", "-n", str(git_recipe)])
     assert "--cleanbuild" in (temporary / "packages/makepkg-arguments").read_text()
 
+    # MinGW must not evaluate packaging variables during an ordinary build.
+    # Each of these overrides records evaluation, even if the recipe never uses it.
+    launches = temporary / "unexpected-packaging-launches"
+    probe_names = ("deb_arch", "deb_date", "deb_git_version")
+    probes = [name + " = $(shell echo " + name + " >> " + str(launches) + ")"
+              for name in probe_names]
+    # A Linux parent make may itself export package variables; isolate the
+    # backend under test so those inherited exports do not create false failures.
+    build_env = {key: value for key, value in env.items() if key not in probe_names}
+    (source / "src/Makefile.export-test").write_text(
+        "\n".join(probes) + "\ninclude Makefile.mingw\n")
+    run([MAKE, "-s", "-f", "Makefile.export-test", "help"],
+        cwd=source / "src", env=build_env)
+    assert not launches.exists(), "MinGW exported unused packaging variables"
+
     # Exercise actual MinGW install recipes with compiler output fixtures.
     executable(tools / "pkg-config", '''#!/bin/sh
 case "$1" in --libs) echo -lpcre2-8;; --cflags) echo -I/mingw64/include;; esac
@@ -85,6 +100,7 @@ import pathlib, shutil, sys
 args = sys.argv[1:]
 out = args[args.index('-o') + 1] if '-o' in args else pathlib.Path(args[-1]).with_suffix('.o')
 if '-c' in args:
+    assert '-DWIN32' in args and '-O0' in args, args
     shutil.copyfile(sys.argv[0] + '.o', out)
 else:
     pathlib.Path(out).write_bytes(b'packaging fixture')
@@ -94,9 +110,10 @@ for arg in args:
 ''')
     shutil.copyfile(temporary / "blank.o", str(compiler) + ".o")
     stage = temporary / "stage"
-    run([MAKE, "-s", "-j4", "-f", "Makefile.mingw", "install",
-         "CC=" + str(compiler), "PREFIX=/mingw64", "DESTDIR=" + str(stage)],
-        cwd=source / "src", env=env)
+    run([MAKE, "-s", "-j4", "-f", "Makefile.export-test", "install",
+         "CC=" + str(compiler), "CFLAGS=-O0", "PREFIX=/mingw64", "DESTDIR=" + str(stage)],
+        cwd=source / "src", env=build_env)
+    assert not launches.exists(), "MinGW build exported unused packaging variables"
     for relative in ["bin/libivy.dll", "bin/ivyprobe.exe", "bin/ivyperf.exe",
                      "lib/libivy.a", "lib/libivy.dll.a", "lib/pkgconfig/libivy.pc",
                      "include/Ivy/ivy.h", "include/Ivy/version.h"]:

@@ -31,8 +31,8 @@ GLUTINC = -I/usr/include -I.
 GLUTLIB = -L.
 TCLINCL	= -I/usr/include/tcl8.4
 TCLLIB = -ltcl84
-PCREINC = $(shell pkg-config --cflags libpcre2-8)
-PCRELIB = $(shell pkg-config --libs libpcre2-8)
+PCREINC := $(shell pkg-config --cflags libpcre2-8)
+PCRELIB := $(shell pkg-config --libs libpcre2-8)
 #PCREINSTALLDIR = c:\temp\GnuWin32
 #PCREINC = -I$(PCREINSTALLDIR)\include
 #PCRELIB = -L$(PCREINSTALLDIR)\lib -lpcre2-8
@@ -51,7 +51,7 @@ REGEXP= -DUSE_PCRE_REGEX -DPCRE_OPT=$(PCRE_OPT)
 
 TOOLS_DIR = ../tools
 CC=gcc
-CFLAGS =  -DWIN32 -DWINVER=0x0601 -D_WIN32_WINNT=0x0601  $(REGEXP) $(PCREINC)
+CPPFLAGS += -DWIN32 -DWINVER=0x0601 -D_WIN32_WINNT=0x0601 $(REGEXP) $(PCREINC)
 # IVY full debug
 #CFLAGS = -g  -DDEBUG -DWIN32 -DWINVER=0x0601 -D_WIN32_WINNT=0x0601  $(REGEXP) $(PCREINC)
 OBJ = ivyloop.o timer.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
@@ -62,11 +62,13 @@ GLUTOBJ = ivyglutloop.o ivysocket.o ivy.o ivybuffer.o ivyfifo.o ivybind.o interv
 TCLOBJ = ivytcl.o  timer.o ivysocket.o givy.o ivybuffer.o ivyfifo.o ivybind.o intervalRegexp.o param.o
 
 # not yiet ivygtkprobe ivyxtprobe  need Modified Glut ivyglutprobe
-# Export all variables (Petr Mejzlik)
-export
+# Export only the build settings needed by recursive tool builds.
+# Exporting everything also evaluates packaging $(shell ...) variables for
+# child processes, causing unnecessary process launches (costly on MSYS2).
+export CC CFLAGS CPPFLAGS LDFLAGS PREFIX DESTDIR
 
 .c.o:
-	$(CC) $(CFLAGS) -c $*.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $*.c
 
 all: static-libs  shared-libs #installlibs #tools 
 

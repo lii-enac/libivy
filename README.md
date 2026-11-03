@@ -154,6 +154,14 @@ PCRE2 and pkgconf packages installed. All installed files use `/mingw64`:
 `bin/libivy.dll`, `lib/libivy.dll.a`, `lib/libivy.a`, headers, pkg-config metadata
 and the `.exe` tools. No files are installed under MSYS2's `/usr` prefix.
 
+From the repository root, build with `make -j8` (or `make -C src -j8`).
+`src/Makefile` selects `Makefile.mingw` automatically: this is the MSYS2 native
+Windows backend, also used by the older pacman recipe. The Linux backend uses
+Unix socket/linker conventions and is unsuitable for MinGW DLLs. Compiler flags
+can be overridden with `CFLAGS` while Windows/PCRE definitions stay in
+`CPPFLAGS`. Only build settings are exported to recursive tool builds; package
+metadata commands are evaluated when packaging needs them.
+
 For a release archive:
 
 ```sh

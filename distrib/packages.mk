@@ -16,10 +16,10 @@ deb_git_version ?= $(VERSION).git$(shell date +%Y%m%d).$(shell git rev-parse --s
 deb_git_build_dir ?= $(package_build_root)/deb-build-git/$(package_host)-$(package_machine)
 deb_git_package ?= $(package_build_root)/deb/libivy_$(deb_git_version)_$(deb_arch).deb
 
+# Keep package filenames lazy: their Debian defaults run dpkg/git/date.
+# Normalize those paths only in the packaging recipes, never during a build.
 override deb_build_dir := $(call package_path,$(deb_build_dir))
-override deb_package := $(call package_path,$(deb_package))
 override deb_git_build_dir := $(call package_path,$(deb_git_build_dir))
-override deb_git_package := $(call package_path,$(deb_git_package))
 
 .PHONY: deb deb_git deb_check deb_verify pkg pkg_git pkg_check pkg_verify clean_packages
 deb_check:
@@ -29,15 +29,15 @@ deb_check:
 	@pkg-config --exists libpcre2-8 || { echo "missing dependency: libpcre2-dev"; exit 1; }
 
 deb: deb_check
-	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_build_dir)" "$(deb_package)" "$(deb_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
+	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_build_dir)" "$(call package_path,$(deb_package))" "$(deb_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
 
 deb_git: deb_check
-	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_git_build_dir)" "$(deb_git_package)" "$(deb_git_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
+	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_git_build_dir)" "$(call package_path,$(deb_git_package))" "$(deb_git_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
 
 deb_verify:
-	dpkg-deb --info "$(deb_package)"
-	dpkg-deb --contents "$(deb_package)"
-	@if command -v lintian >/dev/null; then lintian "$(deb_package)"; else echo "lintian not found, skipping lintian check"; fi
+	dpkg-deb --info "$(call package_path,$(deb_package))"
+	dpkg-deb --contents "$(call package_path,$(deb_package))"
+	@if command -v lintian >/dev/null; then lintian "$(call package_path,$(deb_package))"; else echo "lintian not found, skipping lintian check"; fi
 
 pkg_version ?= $(VERSION)
 pkg_make_jobs ?= 6
