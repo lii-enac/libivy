@@ -11,23 +11,31 @@ def selectedBuild(String name) {
     return !params.BUILD_ONLY?.trim() || params.BUILD_ONLY == 'all' || params.BUILD_ONLY == name
 }
 
-def notifyResult(String status) {
+def notifyResult(String status, String scope = 'Pipeline') {
+    // Same default recipients as djnn-cpp; job variables can override them.
     def recipients = [env.EMAIL1, env.EMAIL2].findAll { it?.trim() }.join(', ')
-    if (recipients) {
-        emailext(
-            to: recipients,
-            subject: "libivy ${status} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            mimeType: 'text/plain',
-            body: """Build: ${env.BUILD_URL}
+    if (!recipients) {
+        recipients = 'mathieu.poirier@enac.fr, stephane.conversy@enac.fr'
+    }
+    def icon = status == 'RECOVERED' ? '✅' : '❌'
+    echo "Sending libivy ${scope} ${status} notification to ${recipients}"
+    emailext(
+        to: recipients,
+        subject: "${icon} libivy ${scope} ${status} - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        mimeType: 'text/plain',
+        attachLog: status in ['FAILURE', 'UNSTABLE', 'ABORTED'],
+        compressLog: true,
+        body: """Stage: ${scope}
+Result: ${status}
+Build: ${env.BUILD_URL}
 Commit: ${env.LIBIVY_REVISION ?: 'checkout failed'}
 
-scan-build and clang-tidy reports (HTML, logs and ZIP):
-${env.BUILD_URL}artifact/
-
 Console: ${env.BUILD_URL}console
+
+scan-build and clang-tidy reports (available after artifact archiving):
+${env.BUILD_URL}artifact/
 """
-        )
-    }
+    )
 }
 
 pipeline {
@@ -71,13 +79,14 @@ pipeline {
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         sh '''
                             set -eu
-                            make version
-                            make -j8 static-libs shared-libs tools pkgconf \
-                                CC="$(xcrun --find clang)" CPP="$(xcrun --find clang++)"
-                            make check CC="$(xcrun --find clang)"
+                            make -j8 all tools
+                            make check
                         '''
                     }
                 }
+            }
+            post {
+                failure { script { notifyResult('FAILURE', 'Build macOS') } }
             }
         }
 
@@ -99,6 +108,9 @@ pipeline {
                                     script { checkoutLibivy(env.LIBIVY_REVISION) }
                                 }
                             }
+                            post {
+                                failure { script { notifyResult('FAILURE', 'Checkout for analysis') } }
+                            }
                         }
                         stage('scan-build') {
                             steps {
@@ -108,6 +120,9 @@ pipeline {
                                     }
                                 }
                             }
+                            post {
+                                failure { script { notifyResult('FAILURE', 'scan-build') } }
+                            }
                         }
                         stage('clang-tidy') {
                             steps {
@@ -116,6 +131,9 @@ pipeline {
                                         sh 'python3 distrib/script/analyze_macos.py tidy --report-dir reports/tidy --jobs 4'
                                     }
                                 }
+                            }
+                            post {
+                                failure { script { notifyResult('FAILURE', 'clang-tidy') } }
                             }
                         }
                     }
@@ -152,6 +170,9 @@ pipeline {
                             '''
                         }
                     }
+                    post {
+                        failure { script { notifyResult('FAILURE', 'Build Ubuntu') } }
+                    }
                 }
 
                 stage('Build Windows MSYS2') {
@@ -177,6 +198,9 @@ pipeline {
                             '''
                         }
                     }
+                    post {
+                        failure { script { notifyResult('FAILURE', 'Build Windows MSYS2') } }
+                    }
                 }
 
                 stage('Build Windows WSL') {
@@ -198,14 +222,24 @@ pipeline {
                             '''
                         }
                     }
+                    post {
+                        failure { script { notifyResult('FAILURE', 'Build Windows WSL') } }
+                    }
                 }
             }
         }
     }
 
     post {
-        success { script { notifyResult('SUCCESS') } }
+        success {
+            script {
+                if (currentBuild.previousBuild?.result in ['FAILURE', 'UNSTABLE']) {
+                    notifyResult('RECOVERED')
+                }
+            }
+        }
         failure { script { notifyResult('FAILURE') } }
         unstable { script { notifyResult('UNSTABLE') } }
+        aborted { script { notifyResult('ABORTED') } }
     }
 }

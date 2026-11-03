@@ -249,8 +249,11 @@ Each report directory has an `index.html`; download the ZIP to browse locally
 if Jenkins restricts HTML/CSS/JavaScript in artifacts. Findings are informational;
 compilation failures, analyzer crashes and failed clang-tidy invocations fail
 the job. A failed run retains an index explaining that the report is incomplete.
-If `EMAIL1` and/or `EMAIL2` are configured, the Email Extension plugin sends the
-build result and artifact links after each run.
+The Email Extension plugin sends a notification for each failed build/analysis
+stage, followed by a final failure summary with artifact links. Ordinary successful
+builds send no mail. Failure mails include the compressed console log. `EMAIL1` and `EMAIL2` override the default
+recipients (Mathieu Poirier and Stéphane Conversy, as in djnn-cpp). A successful
+build after a failure is marked `RECOVERED`. SMTP uses the Jenkins configuration.
 
 Run the same analyses locally from the repository root or `src`:
 
