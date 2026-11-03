@@ -74,7 +74,7 @@ tidy_jobs ?= 4
 scan_build_report_dir ?= build/scan-build-report/$(shell date +%Y%m%d-%H%M%S)
 tidy_report_dir ?= build/tidy-report/$(shell date +%Y%m%d-%H%M%S)
 scan-build:
-	python3 ../tools/analyze_macos.py scan-build --report-dir "$(call package_path,$(scan_build_report_dir))" --jobs "$(scan_build_jobs)"
+	python3 ../distrib/script/analyze_macos.py scan-build --report-dir "$(call package_path,$(scan_build_report_dir))" --jobs "$(scan_build_jobs)"
 
 tidy:
-	python3 ../tools/analyze_macos.py tidy --report-dir "$(call package_path,$(tidy_report_dir))" --jobs "$(tidy_jobs)"
+	python3 ../distrib/script/analyze_macos.py tidy --report-dir "$(call package_path,$(tidy_report_dir))" --jobs "$(tidy_jobs)"

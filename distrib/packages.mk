@@ -29,10 +29,10 @@ deb_check:
 	@pkg-config --exists libpcre2-8 || { echo "missing dependency: libpcre2-dev"; exit 1; }
 
 deb: deb_check
-	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_build_dir)" "$(call package_path,$(deb_package))" "$(deb_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
+	sh "$(package_root)/distrib/script/package-deb.sh" "$(package_root)" "$(deb_build_dir)" "$(call package_path,$(deb_package))" "$(deb_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
 
 deb_git: deb_check
-	sh "$(package_root)/tools/package-deb.sh" "$(package_root)" "$(deb_git_build_dir)" "$(call package_path,$(deb_git_package))" "$(deb_git_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
+	sh "$(package_root)/distrib/script/package-deb.sh" "$(package_root)" "$(deb_git_build_dir)" "$(call package_path,$(deb_git_package))" "$(deb_git_version)" "$(deb_arch)" "$(deb_make_jobs)" "$(deb_date)"
 
 deb_verify:
 	dpkg-deb --info "$(call package_path,$(deb_package))"
@@ -44,7 +44,6 @@ pkg_make_jobs ?= 6
 pkg_prefix ?= /mingw64
 pkg_source ?= https://github.com/lii-enac/libivy/archive/refs/tags/$(VERSION).tar.gz
 pkg_source_dir ?= libivy-$(VERSION)
-pkg_source_sha256 ?=
 pkg_build_dir ?= $(package_build_root)/pkg-build/$(package_host)-$(package_machine)
 pkg_package_glob ?= $(package_build_root)/libivy-$(pkg_version)-*.pkg.tar.*
 pkg_git_version ?= $(VERSION).git
@@ -65,9 +64,9 @@ pkg_check:
 
 pkg: pkg_check
 	mkdir -p "$(package_build_root)" "$(pkg_build_dir)"
-	sed -e "s|@PKG_VERSION@|$(pkg_version)|g; s|@PKG_PREFIX@|$(pkg_prefix)|g; s|@PKG_MAKE_JOBS@|$(pkg_make_jobs)|g; s|@PKG_SOURCE@|$(pkg_source)|g; s|@PKG_SOURCE_DIR@|$(pkg_source_dir)|g; s|@PKG_SOURCE_SHA256@|$(pkg_source_sha256)|g; s|@VCS_DEPENDENCY@||g" "$(package_root)/distrib/PKGBUILD.proto" > "$(pkg_build_dir)/PKGBUILD"
-	@test -n "$(pkg_source_sha256)" || { echo "missing pkg_source_sha256; PKGBUILD generated: $(pkg_build_dir)/PKGBUILD"; echo "Generate the hash with: cd $(pkg_build_dir) && makepkg -g"; exit 1; }
-	cd "$(pkg_build_dir)" && PKGDEST="$(package_build_root)" makepkg -f --cleanbuild
+	sed -e "s|@PKG_VERSION@|$(pkg_version)|g; s|@PKG_PREFIX@|$(pkg_prefix)|g; s|@PKG_MAKE_JOBS@|$(pkg_make_jobs)|g; s|@PKG_SOURCE@|$(pkg_source)|g; s|@PKG_SOURCE_DIR@|$(pkg_source_dir)|g; s|@PKG_SOURCE_SHA256@|AUTO|g; s|@VCS_DEPENDENCY@||g" "$(package_root)/distrib/PKGBUILD.proto" > "$(pkg_build_dir)/PKGBUILD"
+	bash "$(package_root)/distrib/script/prepare-pkg-source.sh" "$(pkg_build_dir)/PKGBUILD"
+	cd "$(pkg_build_dir)" && SRCDEST="$(pkg_build_dir)" PKGDEST="$(package_build_root)" makepkg -f --cleanbuild
 	@ls -lh $(pkg_package_glob)
 
 pkg_git: pkg_check

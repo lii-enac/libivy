@@ -104,7 +104,7 @@ pipeline {
                             steps {
                                 dir('libivy-analysis') {
                                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                                        sh 'python3 tools/analyze_macos.py scan-build --report-dir reports/scan-build --jobs 8'
+                                        sh 'python3 distrib/script/analyze_macos.py scan-build --report-dir reports/scan-build --jobs 8'
                                     }
                                 }
                             }
@@ -113,7 +113,7 @@ pipeline {
                             steps {
                                 dir('libivy-analysis') {
                                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                                        sh 'python3 tools/analyze_macos.py tidy --report-dir reports/tidy --jobs 4'
+                                        sh 'python3 distrib/script/analyze_macos.py tidy --report-dir reports/tidy --jobs 4'
                                     }
                                 }
                             }

@@ -165,13 +165,17 @@ metadata commands are evaluated when packaging needs them.
 For a release archive:
 
 ```sh
-make pkg pkg_source_sha256=<sha256-of-the-release-archive>
+make pkg
 make pkg_verify
 pacman -U build/libivy-*.pkg.tar.*
 ```
 
-With no checksum, `make pkg` generates the PKGBUILD and explains how to run
-`makepkg -g`; archive checksums are never skipped. For a development branch:
+`make pkg` downloads the release archive, computes its SHA-256 and inserts it
+into the generated PKGBUILD automatically. The package uses that same local
+archive, with a fresh extraction on each run. No checksum is maintained in the
+Makefile or supplied manually. The archive, its source URL and the generated
+PKGBUILD remain in the packaging build directory. A download or hashing failure
+stops the process before makepkg. For a development branch:
 
 ```sh
 make pkg_git
@@ -180,7 +184,7 @@ make pkg_verify pkg_package_glob='build/libivy-*.git-*.pkg.tar.*'
 
 `pkg_git_branch` defaults to `master`; `pkg_git_source` and `pkg_git_source_dir`
 can also be overridden. Release builds accept `pkg_source`, `pkg_source_dir`
-and `pkg_source_sha256`, including a local source archive for validation before
+including a local source archive for validation before
 publishing a release. The selected source must contain this packaging system;
 older published archives are not patched for compatibility. Git builds use the
 latest pushed branch, not uncommitted local changes.
@@ -195,11 +199,13 @@ and `pkg_make_jobs` controls parallelism.
 directories; ordinary `make clean` keeps package outputs.
 
 For portable recipe checks, run `make check-packaging` (Python 3 required). These
-use fixture compiler/package tools to verify staging, mandatory release checksums,
+use fixture compiler/package tools to verify staging, automatic release checksums,
 Git source selection and Debian dependency generation/failure handling. They do
 not produce installable packages or replace native Linux/MSYS2 validation.
 
 ## Jenkins and macOS static analysis
+
+Build, packaging and analysis scripts live under `distrib/script/`.
 
 `Jenkinsfile` checks out `https://github.com/lii-enac/libivy.git` anonymously.
 The initial `master` checkout selects a commit; all other checkouts use that

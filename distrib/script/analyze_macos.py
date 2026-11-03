@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def output(command):
@@ -89,7 +89,7 @@ def analyze(args, report):
         if failures:
             raise RuntimeError("scan-build analyzer failures: " + str(len(failures)))
     else:
-        capture = source / "tools/capture_compile.py"
+        capture = source / "distrib/script/capture_compile.py"
         commands = work / "commands"
         env.update(IVY_ANALYSIS_CC=cc, IVY_ANALYSIS_CXX=cxx, IVY_ANALYSIS_COMMANDS=str(commands))
         wrapper = shlex.quote(sys.executable) + " " + shlex.quote(str(capture))
@@ -106,7 +106,7 @@ def analyze(args, report):
         shutil.copyfile(work / "compile_commands.json", report / "compile_commands.json")
         metadata["sources"] = sorted(covered)
         (report / "toolchain.json").write_text(json.dumps(metadata, indent=2) + "\n")
-        run([sys.executable, str(source / "tools/run_tidy.py"), "--build-dir", str(work),
+        run([sys.executable, str(source / "distrib/script/run_tidy.py"), "--build-dir", str(work),
              "--report-dir", str(report / "html"), "--jobs", str(args.jobs),
              "--clang-tidy", str(llvm / "bin/clang-tidy")], source, env, report / "tidy.log")
 

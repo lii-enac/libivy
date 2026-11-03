@@ -5,6 +5,7 @@ These check orchestration, checksums and staged paths; they do not replace
 native dpkg-deb/makepkg builds on Linux and MSYS2.
 """
 import os
+import hashlib
 from pathlib import Path
 import shutil
 import subprocess
@@ -41,29 +42,59 @@ with tempfile.TemporaryDirectory(prefix="libivy-packaging-") as name:
     tools = temporary / "bin"
     tools.mkdir()
     env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ["PATH"])
-    # Fake makepkg only records the generated recipe and creates a fixture archive.
-    executable(tools / "makepkg", '''#!/bin/sh
+    # Fake makepkg checks the prepared archive, then creates a fixture package.
+    executable(tools / "makepkg", '''#!/usr/bin/env bash
 set -eu
 printf '%s\\n' "$@" > "$PKGDEST/makepkg-arguments"
 . ./PKGBUILD
+if [[ ${source[0]} == release-source.tar.gz ]]; then
+    test "$SRCDEST" = "$PWD"
+    actual=$(shasum -a 256 "$SRCDEST/${source[0]}" | awk '{print $1}')
+    test "$actual" = "${sha256sums[0]}"
+fi
 mkdir -p "$PKGDEST/fixture"
 printf fixture > "$PKGDEST/fixture/manifest"
 tar -czf "$PKGDEST/$pkgname-$pkgver-1-x86_64.pkg.tar.gz" -C "$PKGDEST/fixture" manifest
 ''')
     common = [MAKE, "-s", "package_host=MINGW64_NT", "package_build_root=" + str(temporary / "packages")]
-    output = run(common + ["pkg"], cwd=source, env=env, success=False)
-    assert "missing pkg_source_sha256" in output
-    assert not (temporary / "packages/makepkg-arguments").exists()
-    checksum = "a" * 64
-    run(common + ["pkg", "pkg_source_sha256=" + checksum], cwd=source, env=env)
+    archive = temporary / "release.tar.gz"
+    archive.write_bytes(b"first archive contents")
+    env["IVY_TEST_DOWNLOAD_ARCHIVE"] = str(archive)
+    executable(tools / "curl", '''#!/bin/sh
+set -eu
+while [ "$#" -gt 0 ]; do
+    case "$1" in --output) shift; destination=$1;; esac
+    shift
+done
+if [ "${IVY_TEST_DOWNLOAD_FAIL:-0}" = 1 ]; then exit 22; fi
+cp "$IVY_TEST_DOWNLOAD_ARCHIVE" "$destination"
+''')
+    run(common + ["pkg"], cwd=source, env=env)
     recipes = list((temporary / "packages/pkg-build").glob("*/PKGBUILD"))
     assert len(recipes) == 1
-    text = recipes[0].read_text()
+    recipe = recipes[0]
+    text = recipe.read_text()
+    checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
     assert "sha256sums=('" + checksum + "')" in text
+    assert "source=('release-source.tar.gz')" in text
     assert "options=('staticlibs')" in text
     assert "mingw-w64-x86_64-pcre2" in text
     assert "SKIP" not in text and "@PKG_" not in text
-    run(["bash", "-n", str(recipes[0])])
+    run(["bash", "-n", str(recipe)])
+    # A replaced tag must fetch new bytes and recompute their checksum.
+    archive.write_bytes(b"updated archive contents")
+    run(common + ["pkg"], cwd=source, env=env)
+    checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+    assert "sha256sums=('" + checksum + "')" in recipe.read_text()
+    assert (recipe.parent / "release-source.tar.gz").read_bytes() == archive.read_bytes()
+    # Local archives follow the same path without a download.
+    run(common + ["pkg", "pkg_source=" + str(archive)], cwd=source, env=env)
+    assert "sha256sums=('" + checksum + "')" in recipe.read_text()
+    marker = temporary / "packages/makepkg-arguments"
+    marker.unlink()
+    run(common + ["pkg"], cwd=source,
+        env=dict(env, IVY_TEST_DOWNLOAD_FAIL="1"), success=False)
+    assert not marker.exists(), "Failed download must prevent makepkg"
     run(common + ["pkg_git", "pkg_git_branch=packaging-test"], cwd=source, env=env)
     git_recipe = next((temporary / "packages/pkg-build-git").glob("*/PKGBUILD"))
     text = git_recipe.read_text()
@@ -168,7 +199,7 @@ tar -cf "$3" -C "$2" .
 ''')
     deb_env = dict(env, IVY_PACKAGE_TEST_LOG=str(temporary / "deb-make-calls"))
     package = temporary / "deb-output/libivy-test.deb"
-    args = ["sh", str(source / "tools/package-deb.sh"), str(source),
+    args = ["sh", str(source / "distrib/script/package-deb.sh"), str(source),
             str(temporary / "deb-build"), str(package), "3.16.1.git20261102.test",
             "arm64", "2", "Mon, 02 Nov 2026 12:00:00 +0100"]
     run(args, env=deb_env)
@@ -193,4 +224,4 @@ tar -cf "$3" -C "$2" .
     assert not failed_package.exists()
     assert not list((temporary / "deb-build").iterdir())
 
-print("Packaging recipes: SHA-256, Git metadata, MinGW staging and Debian dependency orchestration passed")
+print("Packaging recipes: automatic SHA-256, Git metadata, MinGW staging and Debian dependency orchestration passed")
