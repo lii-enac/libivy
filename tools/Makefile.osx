@@ -1,4 +1,4 @@
-TARGETS = ivyprobe ivythroughput ivyperf #ivyprobe_efence 
+TARGETS = ivyprobe
 OMP_TARGET= ivyprobe_omp ivythroughput_omp 
 OMPLIB = -lgomp -lpthread
 OMPCC = gcc-mp-4.4  
@@ -61,7 +61,7 @@ install_omp: installbins_omp
 
 
 clean:
-	rm -fR $(TARGETS) *~ *.o
+	rm -fR $(TARGETS) ivyperf ivythroughput *~ *.o
 
 # Refresh the version displayed by tools after version.h changes.
 ivyprobe.o ivythroughput.o ivyperf.o: ../src/version.h

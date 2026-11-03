@@ -28,8 +28,10 @@ make -f Makefile.osx static-libs shared-libs
 make -f Makefile.osx install PREFIX=/your/install/prefix
 ```
 
-The install target also builds the tools, including `ivythroughput`. The tools
-now use Ivy's regex engine rather than PCRE1's `pcrecpp` wrapper. For Linux use
+The default build and packages include `ivyprobe` as their only command-line
+tool. `ivyperf` (round-trip timing) and `ivythroughput` remain optional manual
+build targets in the Unix tools Makefiles. They use Ivy's regex engine rather than
+PCRE1's `pcrecpp` wrapper. For Linux use
 `make` in `src`; for MinGW use `make -f Makefile.mingw`.
 Use `CASESENSITIVE=no` to build a case-insensitive engine (default: `yes`).
 Clean/rebuild existing objects when switching from PCRE1, changing this option,
@@ -128,7 +130,7 @@ sudo apt install ./build/deb/libivy_*.deb
 `version.h`. It builds and tests a fresh source copy under `build/deb-build`,
 installs into a staging directory under `/usr`, then builds a `.deb` in
 `build/deb`. It never installs into the host system. The package includes shared
-and static libraries, headers, pkg-config metadata, `ivyprobe` and `ivyperf`.
+and static libraries, headers, pkg-config metadata, `ivyprobe`.
 `dpkg-shlibdeps` determines runtime dependencies; `libpcre2-dev` and `pkgconf`
 are also required because this package includes development files. The package
 replaces the old `ivy-c`/`ivy-c-dev` packages.
@@ -152,7 +154,7 @@ invoking make from `src`.
 Use an MSYS2 MinGW64 shell with `makepkg`, `make`, Git and the MinGW64 GCC,
 PCRE2 and pkgconf packages installed. All installed files use `/mingw64`:
 `bin/libivy.dll`, `lib/libivy.dll.a`, `lib/libivy.a`, headers, pkg-config metadata
-and the `.exe` tools. No files are installed under MSYS2's `/usr` prefix.
+and `ivyprobe.exe`. No files are installed under MSYS2's `/usr` prefix.
 
 From the repository root, build with `make -j8` (or `make -C src -j8`).
 `src/Makefile` selects `Makefile.mingw` automatically: this is the MSYS2 native
@@ -235,8 +237,8 @@ dependencies on each agent. On macOS, also install Homebrew `llvm` and Python
 provides the analyzers and stays out of `PATH`. MSYS2 needs GNU make and MinGW
 GCC in addition to PCRE2/pkgconf, with MinGW executables available in `PATH`.
 
-Both analyses cover the normal macOS C library and C/C++ command-line tools
-(currently 12 translation units). Optional event-loop backends and code guarded
+Both analyses cover the normal macOS C library and `ivyprobe`
+(currently 10 C translation units). Optional event-loop backends and code guarded
 by other platform macros are outside this analysis configuration. Clang-tidy
 uses the compilation commands captured during a real successful build and
 checks configured in `.clang-tidy`; it does not modify the sources.

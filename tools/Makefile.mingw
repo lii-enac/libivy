@@ -20,7 +20,7 @@ CC ?= gcc
 PREFIX ?= /mingw64
 PCRELIB = $(shell pkg-config --libs libpcre2-8)
 EXTRAINC = -I../src
-TARGETS = ivyprobe.exe ivyperf.exe
+TARGETS = ivyprobe.exe
 
 .PHONY: all install installbins clean
 all: $(TARGETS)
@@ -37,6 +37,6 @@ installbins: $(TARGETS)
 	install -m755 $(TARGETS) $(DESTDIR)$(PREFIX)/bin/
 
 clean:
-	rm -f $(TARGETS) *.o
+	rm -f $(TARGETS) ivyperf.exe *.o
 
 ivyprobe.o ivyperf.o: ../src/version.h

@@ -1,4 +1,4 @@
-TARGETS = ivyprobe ivyperf
+TARGETS = ivyprobe
 OMP_TARGET= ivyprobe_omp ivythroughput_omp 
 
 PCRELIB = `pkg-config --libs libpcre2-8`
@@ -73,7 +73,7 @@ install_omp: installbins_omp
 
 
 clean:
-	rm -fR $(TARGETS) $(OMP_TARGET) *~ *.o
+	rm -fR $(TARGETS) ivyperf ivythroughput $(OMP_TARGET) *~ *.o
 
 # Refresh the version displayed by tools after version.h changes.
 ivyprobe.o ivythroughput.o ivyperf.o: ../src/version.h

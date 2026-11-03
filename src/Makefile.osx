@@ -152,9 +152,7 @@ includes:
 installbins: tools
 	test -d $(DESTDIR)$(PREFIX)/bin || mkdir -p $(DESTDIR)$(PREFIX)/bin
 	install -m755 $(TOOLS_DIR)/ivyprobe $(DESTDIR)$(PREFIX)/bin
-	install -m755 $(TOOLS_DIR)/ivyperf $(DESTDIR)$(PREFIX)/bin
 	install_name_tool -change libivy.dylib $(DESTDIR)$(PREFIX)/lib/libivy.dylib $(DESTDIR)$(PREFIX)/bin/ivyprobe
-	install_name_tool -change libivy.dylib $(DESTDIR)$(PREFIX)/lib/libivy.dylib $(DESTDIR)$(PREFIX)/bin/ivyperf
 
 
 tools: static-libs

@@ -36,7 +36,7 @@ printf 'libivy %s libivy (>= %s)\n' "$major" "$version" > "$stage/DEBIAN/shlibs"
 shlibs=$(cd "$source_dir" && dpkg-shlibdeps -O -xlibivy \
     -L"$stage/DEBIAN/shlibs" -S"$stage" -l"$stage/usr/lib" \
     -e"$stage/usr/lib/libivy.so.$major.$minor" \
-    -e"$stage/usr/bin/ivyprobe" -e"$stage/usr/bin/ivyperf")
+    -e"$stage/usr/bin/ivyprobe")
 dependencies=$(printf '%s\n' "$shlibs" | sed -n 's/^shlibs:Depends=//p')
 if [ -z "$dependencies" ]; then
     echo 'dpkg-shlibdeps did not produce runtime dependencies' >&2
@@ -49,7 +49,7 @@ sed -e "s|@VERSION@|$version|g; s|@DATE@|$package_date|g" \
 install -m 644 "$root/distrib/deb/copyright" "$stage/usr/share/doc/libivy/copyright"
 install -m 644 "$source_dir/README.md" "$stage/usr/share/doc/libivy/README.md"
 strip --strip-unneeded "$stage/usr/lib/libivy.so.$major.$minor" \
-    "$stage/usr/bin/ivyprobe" "$stage/usr/bin/ivyperf"
+    "$stage/usr/bin/ivyprobe"
 strip --strip-debug "$stage/usr/lib/libivy.a"
 find "$stage" -type d -exec chmod 755 {} \;
 chmod 644 "$stage/DEBIAN/"* "$stage/usr/share/doc/libivy/"*

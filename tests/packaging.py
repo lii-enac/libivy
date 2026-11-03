@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory(prefix="libivy-packaging-") as name:
     snapshot(source)
     tools = temporary / "bin"
     tools.mkdir()
-    env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ["PATH"])
+    env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ["PATH"], COPYFILE_DISABLE="1")
     # Fake makepkg checks the prepared archive, then creates a fixture package.
     executable(tools / "makepkg", '''#!/usr/bin/env bash
 set -eu
@@ -145,10 +145,12 @@ for arg in args:
          "CC=" + str(compiler), "CFLAGS=-O0", "PREFIX=/mingw64", "DESTDIR=" + str(stage)],
         cwd=source / "src", env=build_env)
     assert not launches.exists(), "MinGW build exported unused packaging variables"
-    for relative in ["bin/libivy.dll", "bin/ivyprobe.exe", "bin/ivyperf.exe",
+    for relative in ["bin/libivy.dll", "bin/ivyprobe.exe",
                      "lib/libivy.a", "lib/libivy.dll.a", "lib/pkgconfig/libivy.pc",
                      "include/Ivy/ivy.h", "include/Ivy/version.h"]:
         assert (stage / "mingw64" / relative).is_file(), relative
+    assert {path.name for path in (stage / "mingw64/bin").iterdir()} == {"libivy.dll", "ivyprobe.exe"}
+    assert not (source / "tools/ivyperf.o").exists()
     assert not (stage / "usr").exists()
     assert not list(stage.rglob("*.so*"))
     pc = (stage / "mingw64/lib/pkgconfig/libivy.pc").read_text()
@@ -173,7 +175,7 @@ with open(os.environ['IVY_PACKAGE_TEST_LOG'], 'a') as log:
     log.write(' '.join(args) + '\\n')
 if 'install' in args:
     stage = pathlib.Path(next(arg.split('=', 1)[1] for arg in args if arg.startswith('DESTDIR=')))
-    for name in ['usr/lib/libivy.so.3.16', 'usr/lib/libivy.a', 'usr/bin/ivyprobe', 'usr/bin/ivyperf', 'usr/include/Ivy/ivy.h']:
+    for name in ['usr/lib/libivy.so.3.16', 'usr/lib/libivy.a', 'usr/bin/ivyprobe', 'usr/include/Ivy/ivy.h']:
         path = stage / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text('packaging fixture')
@@ -206,6 +208,9 @@ tar -cf "$3" -C "$2" .
     import gzip
     import tarfile
     with tarfile.open(package) as archive:
+        binaries = {entry.name for entry in archive.getmembers()
+                    if entry.isfile() and entry.name.startswith("./usr/bin/")}
+        assert binaries == {"./usr/bin/ivyprobe"}, binaries
         control = archive.extractfile("./DEBIAN/control").read().decode()
         assert "Version: 3.16.1.git20261102.test" in control
         assert "Architecture: arm64" in control
