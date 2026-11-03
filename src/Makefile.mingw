@@ -214,7 +214,6 @@ install-pkgdeps:
 upgrade-pkgdeps:
 	$(pkgupg) $(pkgdeps)
 
-clear: clean_packages
 
 
 include Makefile.targets

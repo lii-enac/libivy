@@ -1,5 +1,5 @@
 # Shared targets for the Linux, macOS and MinGW backends.
-.PHONY: all static-libs shared-libs tools pkgconf install clean help clean-tests
+.PHONY: all static-libs shared-libs tools pkgconf install clean clear help clean-tests
 
 help:
 	@echo "Available targets:"
@@ -26,6 +26,7 @@ help:
 	@echo ""
 	@echo "Cleaning:"
 	@echo "  make clean            remove generated libraries, objects, tools and test builds"
+	@echo "  make clear            alias for make clean"
 	@echo ""
 	@echo "Tests:"
 	@echo "  make check"
@@ -34,6 +35,8 @@ help:
 	@echo "  make check-bus   requires a built library and sockets"
 	@echo ""
 	@echo "Tip: clean before switching architecture or regex build options."
+
+clear: clean
 
 clean: clean-tests
 

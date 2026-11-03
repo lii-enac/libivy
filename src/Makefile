@@ -247,7 +247,6 @@ libtclivy.so.$(MAJOR).$(MINOR): $(TCLOBJ)
 #	libtool -dynamic -o $@ $(TCLOBJ) $(TCLLIB) $(PCREOBJ) $(PCRELIB) -lc
 
 distclean: clean
-clear: clean 
 clean:
 	-rm -f $(TARGETS) $(TARGETLIBS)  *.o *.a *.so *.so.* *~ *.pc
 	rm -rf build/
