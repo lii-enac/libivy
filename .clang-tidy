@@ -1,0 +1,21 @@
+# Correctness checks for the C library and its C/C++ tools.
+# Path-sensitive clang-analyzer checks are covered by scan-build separately.
+Checks: >-
+  -*,
+  bugprone-assert-side-effect,
+  bugprone-bool-pointer-implicit-conversion,
+  bugprone-inaccurate-erase,
+  bugprone-infinite-loop,
+  bugprone-misplaced-pointer-arithmetic-in-alloc,
+  bugprone-multiple-statement-macro,
+  bugprone-sizeof-expression,
+  bugprone-suspicious-memory-comparison,
+  bugprone-suspicious-memset-usage,
+  bugprone-suspicious-realloc-usage,
+  bugprone-suspicious-semicolon,
+  bugprone-suspicious-string-compare,
+  bugprone-unused-return-value,
+  performance-*
+WarningsAsErrors: ''
+HeaderFilterRegex: '(^|/)(src|tools)/'
+ExcludeHeaderFilterRegex: '(^|/)uthash\.h$'

@@ -190,3 +190,62 @@ For portable recipe checks, run `make check-packaging` (Python 3 required). Thes
 use fixture compiler/package tools to verify staging, mandatory release checksums,
 Git source selection and Debian dependency generation/failure handling. They do
 not produce installable packages or replace native Linux/MSYS2 validation.
+
+## Jenkins and macOS static analysis
+
+`Jenkinsfile` checks out `https://github.com/lii-enac/libivy.git` anonymously.
+The initial `master` checkout selects a commit; all other checkouts use that
+exact commit. Configure the Jenkins job itself with this public URL and no Git
+credentials. SCM polling checks for changes every five minutes; manual builds
+work too. Each node uses a clean directory inside its Jenkins job workspace.
+
+Every run first builds the static/shared libraries, command-line tools and
+pkg-config metadata on `macos12`, then runs `make check`. The next stage runs
+four branches in parallel:
+
+- macOS: scan-build, then clang-tidy, with a separate fresh source copy for each;
+- Ubuntu (`ubuntu`): build and `make check`;
+- MSYS2/MinGW64 (`win10`): build and `make check`;
+- WSL (`wsl`): build and `make check`.
+
+`BUILD_ONLY` limits the other platform builds. The macOS build and both analyses
+always run. A macOS compilation failure still allows these branches to run;
+a scan-build failure still allows clang-tidy to run. Checkout failures and
+agent allocation failures can prevent the dependent stages from starting.
+There is no installation, package publication or downstream job trigger.
+
+Required Jenkins components are Declarative Pipeline and Git; the Windows
+agent uses the existing `Git-MSYS` Git installation. Install the normal build
+dependencies on each agent. On macOS, also install Homebrew `llvm` and Python
+3.9 or newer (`brew install llvm python`). Apple Clang builds the code; LLVM
+provides the analyzers and stays out of `PATH`. MSYS2 needs GNU make and MinGW
+GCC in addition to PCRE2/pkgconf, with MinGW executables available in `PATH`.
+
+Both analyses cover the normal macOS C library and C/C++ command-line tools
+(currently 12 translation units). Optional event-loop backends and code guarded
+by other platform macros are outside this analysis configuration. Clang-tidy
+uses the compilation commands captured during a real successful build and
+checks configured in `.clang-tidy`; it does not modify the sources.
+
+Reports, logs, toolchain/commit metadata and a ZIP are archived as Jenkins
+artifacts under `reports/scan-build`, `reports/tidy` and `analysis-reports.zip`.
+Each report directory has an `index.html`; download the ZIP to browse locally
+if Jenkins restricts HTML/CSS/JavaScript in artifacts. Findings are informational;
+compilation failures, analyzer crashes and failed clang-tidy invocations fail
+the job. A failed run retains an index explaining that the report is incomplete.
+If `EMAIL1` and/or `EMAIL2` are configured, the Email Extension plugin sends the
+build result and artifact links after each run.
+
+Run the same analyses locally from the repository root or `src`:
+
+```sh
+make scan-build
+make tidy
+# Optional parallelism and report location (relative to the repository root):
+make tidy tidy_jobs=4 tidy_report_dir=build/my-tidy-report
+```
+
+By default the reports are timestamped under `build/scan-build-report/` and
+`build/tidy-report/`. An explicit report directory must be empty to prevent
+mixing results from different runs. Isolated source copies and their build
+files remain under `build/analysis/` for investigation.
