@@ -59,17 +59,14 @@ exit "${IVY_TEST_EXIT:-0}"
                                     capture_output=True, text=True)
             assert result.returncode == 0, result.stdout + result.stderr
             lines = log.read_text().splitlines()
-            missing = [package for package in packages.split() if package not in installed.split()]
-            if not missing:
-                assert not lines, lines
-                assert "already installed" in result.stdout
-                continue
             assert ("sudo" in lines) == (platform == "Linux"), lines
             command = lines[-1].split()
             assert command[0] == manager
-            assert command[-len(missing):] == missing, command
+            assert command[-len(packages.split()):] == packages.split(), command
+            assert "reinstall" not in command
             if manager == "apt": assert "--no-reinstall" in command
-            if manager == "pacman": assert "--needed" in command
+            if manager == "pacman":
+                assert "--needed" in command and "--noconfirm" in command and "-Syu" in command
         # Upgrade is explicit, includes all dependencies and propagates errors.
         log.write_text("")
         result = subprocess.run(["/bin/sh", str(SCRIPT), "upgrade"],
@@ -101,4 +98,4 @@ exit "${IVY_TEST_EXIT:-0}"
                 assert result.returncode == 0, result.stdout + result.stderr
                 assert any(line.startswith(manager + " ") for line in log.read_text().splitlines())
 
-print("Dependency installers: APT/Homebrew/pacman, installed packages skipped, upgrades, failures and root/src targets passed")
+print("Dependency installers: APT/Homebrew/pacman, update/no-reinstall commands, failures and root/src targets passed")

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Install dependencies for the native libivy backend; skip installed packages.
+# Install/update native libivy dependencies without reinstalling current versions.
 set -eu
 action=${1:-install}
 case "$action" in install|upgrade) ;; *) echo "Unknown action: $action" >&2; exit 1;; esac
@@ -24,31 +24,15 @@ as_root() {
     if [ "$(id -u)" = 0 ]; then "$@"; else sudo "$@"; fi
 }
 
-is_installed() {
-    case "$manager" in
-        brew) brew list --formula --versions "$1" >/dev/null 2>&1 ;;
-        apt) [ "$(dpkg-query -W -f='${Status}' "$1" 2>/dev/null)" = 'install ok installed' ] ;;
-        pacman) pacman -Q "$1" >/dev/null 2>&1 ;;
-    esac
-}
-
-set --
-# Package names above are fixed identifiers, intentionally split into arguments.
-for dependency in $dependencies; do
-    if [ "$action" = upgrade ] || ! is_installed "$dependency"; then
-        set -- "$@" "$dependency"
-    fi
-done
-if [ "$#" -eq 0 ]; then
-    echo 'All libivy build dependencies are already installed.'
-    exit 0
-fi
+# Let the manager install missing packages and upgrade outdated ones.
+# Current versions are skipped by install / --no-reinstall / --needed.
+set -- $dependencies
 
 case "$manager:$action" in
-    brew:install) brew install "$@" ;;
-    brew:upgrade) brew upgrade "$@" ;;
-    apt:install) as_root apt install -y --no-reinstall "$@" ;;
+    brew:install) brew update; HOMEBREW_NO_ASK=1 brew install "$@" ;;
+    brew:upgrade) HOMEBREW_NO_ASK=1 brew upgrade "$@" ;;
+    apt:install) export DEBIAN_FRONTEND=noninteractive; as_root apt update; as_root apt install -y --no-reinstall "$@" ;;
     apt:upgrade) as_root apt install -y --only-upgrade "$@" ;;
-    pacman:install) pacman -S --needed "$@" ;;
-    pacman:upgrade) pacman -Syu --needed "$@" ;;
+    pacman:install) pacman -Syu --needed --noconfirm "$@" ;;
+    pacman:upgrade) pacman -Syu --needed --noconfirm "$@" ;;
 esac
