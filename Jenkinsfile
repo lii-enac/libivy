@@ -79,7 +79,7 @@ pipeline {
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         sh '''
                             set -eu
-                            make install-pkgdeps
+                            ALL_PROXY=http://proxy.recherche.enac.fr:3128 make install-pkgdeps
                             make -j8 all tools
                             make check
                         '''
@@ -166,7 +166,7 @@ pipeline {
                             sh '''
                                 set -eu
                                 make version
-                                sudo make install-pkgdeps
+                                ALL_PROXY=http://proxy.recherche.enac.fr:3128 sudo make install-pkgdeps
                                 make -j8 static-libs shared-libs tools pkgconf
                                 make check
                             '''
@@ -189,7 +189,7 @@ pipeline {
                         dir('libivy') {
                             deleteDir()
                             script { checkoutLibivy(env.LIBIVY_REVISION) }
-                            bat 'make install-pkgdeps'
+                            bat 'set "ALL_PROXY=http://proxy.recherche.enac.fr:3128" && make install-pkgdeps'
                             bat '''
                                 @echo on
                                 make version
