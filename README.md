@@ -3,16 +3,24 @@
 Ivy software bus. The regular expression engine is **PCRE2, 8-bit API**
 (`libpcre2-8` in pkg-config). The public Ivy C API is unchanged.
 
-Install the build dependency:
+Install dependencies from the repository root or `src`:
 
 ```sh
-# macOS
-brew install pcre2 pkgconf
-# Debian / Ubuntu
-sudo apt install build-essential pkgconf libpcre2-dev
-# MSYS2 / MinGW64
-pacman -S mingw-w64-x86_64-pcre2 mingw-w64-x86_64-pkgconf
+make install-pkgdeps
 ```
+
+The target uses the same package managers as djnn-cpp:
+
+- Linux / Debian / Ubuntu (APT): `build-essential pkgconf libpcre2-dev`;
+- macOS (Homebrew): `pcre2 pkgconf` (Apple command-line tools must already be installed);
+- Windows / MSYS2 MinGW64 (pacman): `make` and MinGW64 GCC, PCRE2 and pkgconf.
+
+Already installed packages are skipped. If all dependencies are present, no
+installation command is run. Linux uses `sudo` when needed; Homebrew and MSYS2
+run as the current user. `make upgrade-pkgdeps` explicitly upgrades dependencies
+(pacman also updates the system). `make check-pkgdeps` tests dependency detection
+and command selection with fixture tools, without installing packages.
+Optional tests and analysis still require Python/LLVM as documented below.
 
 From the repository root or `src`, `make` selects the native platform backend.
 `make help` lists the targets and `make clean` removes generated build files,

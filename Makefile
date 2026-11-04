@@ -3,7 +3,8 @@
 forward_targets := all static-libs shared-libs tools pkgconf install clean clear help \
                    test check check-caseless sanitize check-bus version \
                    deb deb_git deb_check deb_verify pkg pkg_git pkg_check pkg_verify \
-                   clean_packages check-packaging scan-build tidy
+                   clean_packages check-packaging scan-build tidy \
+                   install-pkgdeps upgrade-pkgdeps check-pkgdeps
 .PHONY: $(forward_targets) forward
 $(forward_targets): forward
 

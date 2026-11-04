@@ -6,7 +6,9 @@ help:
 	@echo "  make                  build libivy using the native platform backend"
 	@echo "  make static-libs      build the static library"
 	@echo "  make shared-libs      build the shared library"
-	@echo "  make tools            build the command-line tools"
+	@echo "  make tools            build ivyprobe"
+	@echo "  make install-pkgdeps  install PCRE2, pkgconf and build dependencies"
+	@echo "  make upgrade-pkgdeps  upgrade these dependencies"
 	@echo "  make version          print the release version from version.h"
 	@echo "  make pkgconf          generate pkg-config metadata"
 	@echo "  make install PREFIX=/path   install libraries, headers and tools"
@@ -22,6 +24,7 @@ help:
 	@echo "  make pkg_git          build a MinGW64 package from a Git branch"
 	@echo "  make pkg_verify       inspect a pacman package"
 	@echo "  make check-packaging  validate recipes with fixture tools (requires Python 3)"
+	@echo "  make check-pkgdeps    validate dependency installers with fixture tools"
 	@echo "  make clean_packages   remove packaging outputs"
 	@echo ""
 	@echo "Cleaning:"
@@ -78,3 +81,14 @@ scan-build:
 
 tidy:
 	python3 ../distrib/script/analyze_macos.py tidy --report-dir "$(call package_path,$(tidy_report_dir))" --jobs "$(tidy_jobs)"
+
+# Dependencies are resolved only when requested, not during normal compilation.
+.PHONY: install-pkgdeps upgrade-pkgdeps check-pkgdeps
+install-pkgdeps:
+	sh ../distrib/script/install-pkgdeps.sh install
+
+upgrade-pkgdeps:
+	sh ../distrib/script/install-pkgdeps.sh upgrade
+
+check-pkgdeps:
+	python3 ../tests/pkgdeps.py
