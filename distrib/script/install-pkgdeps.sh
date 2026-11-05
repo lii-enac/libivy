@@ -33,6 +33,6 @@ case "$manager:$action" in
     brew:upgrade) HOMEBREW_NO_ASK=1 brew upgrade "$@" ;;
     apt:install) export DEBIAN_FRONTEND=noninteractive; as_root apt update; as_root apt install -y --no-reinstall "$@" ;;
     apt:upgrade) as_root apt install -y --only-upgrade "$@" ;;
-    pacman:install) pacman -Syu --needed --noconfirm "$@" ;;
+    pacman:install) pacman -S --needed --noconfirm "$@" ;;
     pacman:upgrade) pacman -Syu --needed --noconfirm "$@" ;;
 esac

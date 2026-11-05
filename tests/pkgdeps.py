@@ -66,7 +66,8 @@ exit "${IVY_TEST_EXIT:-0}"
             assert "reinstall" not in command
             if manager == "apt": assert "--no-reinstall" in command
             if manager == "pacman":
-                assert "--needed" in command and "--noconfirm" in command and "-Syu" in command
+                assert "--needed" in command and "--noconfirm" in command and "-S" in command
+                assert "-Syu" not in command and "-Sy" not in command
         # Upgrade is explicit, includes all dependencies and propagates errors.
         log.write_text("")
         result = subprocess.run(["/bin/sh", str(SCRIPT), "upgrade"],

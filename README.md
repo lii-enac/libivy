@@ -15,8 +15,9 @@ The target uses the same package managers as djnn-cpp:
 - macOS (Homebrew): `pcre2 pkgconf` (Apple command-line tools must already be installed);
 - Windows / MSYS2 MinGW64 (pacman): `make` and MinGW64 GCC, PCRE2 and pkgconf.
 
-The package manager refreshes its metadata, installs missing dependencies and upgrades outdated ones;
-current versions are not reinstalled. Confirmations are automatic. Linux uses
+APT and Homebrew refresh metadata, install missing dependencies and upgrade
+outdated ones. On Windows, pacman installs dependencies from the local database
+without a system upgrade. Current versions are not reinstalled. Confirmations are automatic. Linux uses
 `sudo` when needed; Homebrew and MSYS2 run as the current user. `make upgrade-pkgdeps` explicitly upgrades dependencies
 (pacman also updates the system). `make check-pkgdeps` tests dependency detection
 and command selection with fixture tools, without installing packages.
